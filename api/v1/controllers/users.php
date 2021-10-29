@@ -11,16 +11,14 @@ require_once('../libraries/Response.php');
 // Getting Existing User
 // /users/1
 
+
+
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     if (isset($_GET['user'])) {
         $uId = $_GET['user'];
-
         $user = new User('tempUser', 'tempPass', null, 'tempFirst', 'tempLast', null, null, null);
-
         $user->getDetails($uId);
-    }
-    else
-    {
+    } else {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
@@ -65,7 +63,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $newUser = new User($jsonData->username, $jsonData->password, isset($jsonData->email) ? $jsonData->email : null, $jsonData->firstName, $jsonData->lastName, isset($jsonData->class) ? $jsonData->class : null, isset($jsonData->description) ? $jsonData->description : null, isset($jsonData->followers) ? $jsonData->followers : null);
 
         $newUser->createNewUser();
-
     } catch (UserException $ex) {
         $response = new Response();
         $response->setHttpStatusCode(400);
@@ -74,11 +71,80 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $response->send();
         exit;
     }
-} elseif ($_SERVER['REQUEST_METHOD' == 'PATCH']) {
-} elseif ($_SERVER['REQUEST_METHOD' == 'DELETE']) {
-    if(isset($_GET['user']))
-    {
+} elseif ($_SERVER['REQUEST_METHOD'] == 'PATCH') {
 
+    if ($_SERVER['CONTENT_TYPE'] != 'application/json') {
+        $response = new Response();
+        $response->setHttpStatusCode(400);
+        $response->setSuccess(false);
+        $response->addMessage("Header type not set to JSON");
+        $response->send();
+        exit;
+    }
+
+    $rawData = file_get_contents('php://input');
+
+    if (!$jsonData = json_decode($rawData)) {
+        $response = new Response();
+        $response->setHttpStatusCode(400);
+        $response->setSuccess(false);
+        $response->addMessage("Invalid JSON body");
+        $response->send();
+        exit;
+    }
+
+    if (isset($_GET['user'])) {
+        $uId = $_GET['user'];
+
+        $user = new User('tempUser', 'tempPass', null, 'tempFirst', 'tempLast', null, null, null);
+
+        if(isset($jsonData->password) || isset($jsonData->email) || isset($jsonData->firstName) || isset($jsonData->lastName) || isset($jsonData->class) || isset($jsonData->description))
+        {
+            $receivedData = array();
+
+            isset($jsonData->password) ? $receivedData['password'] = $jsonData->password : false;
+            isset($jsonData->email) ? $receivedData['email'] = $jsonData->email : false;
+            isset($jsonData->firstName) ? $receivedData['firstName'] = $jsonData->firstName : false;
+            isset($jsonData->lastName) ? $receivedData['lastName'] = $jsonData->lastName : false;
+            isset($jsonData->class) ? $receivedData['class'] = $jsonData->class : false;
+            isset($jsonData->description) ? $receivedData['description'] = $jsonData->description : false;
+
+            $user->updateInfo($uId, $receivedData);
+        }
+        else
+        {
+            $response = new Response();
+        $response->setHttpStatusCode(400);
+        $response->setSuccess(false);
+        isset($jsonData->username) ? $response->addMessage('Username can\'t be updated') : false;
+        isset($jsonData->id) ? $response->addMessage('User ID can\'t be updated') : false;
+        isset($jsonData->followers) ? $response->addMessage('Followers can\'t be updated manually') : false;
+        isset($jsonData->userCreatedDate) ? $response->addMessage('User Signed up date can\'t be updated') : false;
+        $response->send();
+        exit;
+        }
+
+    } else {
+        $response = new Response();
+        $response->setHttpStatusCode(400);
+        $response->setSuccess(false);
+        $response->addMessage("User is required to update information");
+        $response->send();
+        exit;
+    }
+} elseif ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
+    if (isset($_GET['user'])) {
+        $uId = $_GET['user'];
+
+        $user = new User('tempUser', 'tempPass', null, 'tempFirst', 'tempLast', null, null, null);
+        $user->deleteUser($uId);
+    } else {
+        $response = new Response();
+        $response->setHttpStatusCode(400);
+        $response->setSuccess(false);
+        $response->addMessage("User is required for deletion");
+        $response->send();
+        exit;
     }
 } else {
     $response = new Response();
@@ -88,8 +154,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $response->send();
     exit;
 }
-
-
 
 
 

@@ -161,6 +161,8 @@ class User
                 throw new UserException('Invalid Email');
             // elseif (!$this->validator->isValidEmail($email))
             //     throw new UserException('Invalid Email');
+            else
+                $this->email = $email;
         } else
             $this->email = $email;
     }
@@ -189,13 +191,15 @@ class User
             $this->lastName = $lastname;
     }
 
-    public function setclass($class)
+    public function setClass($class)
     {
         if (!is_null($class)) {
             if (strlen($class) < 1)
                 throw new UserException('Invalid Class level');
             elseif ($class == '')
                 throw new UserException('Invalid Class level');
+            else
+                $this->class = $class;
         } else
             $this->class = $class;
     }
@@ -242,18 +246,9 @@ class User
 
     public function createUserFromRow($row)
     {
-        // $this->setId($row['id']);
-        // $this->setUsername($row['username']);
-        // $this->setEmail($row['email']);
-        // $this->setFirstName($row['firstName']);
-        // $this->setLastName($row['lastName']);
-        // $this->setDescription($row['description']);
-        // $this->setClass($row['class']);
-        // $this->setFollowers($row['followers']);
-        // $this->setUserCreatedDate($row['userCreatedDate']);
-
         $this->setId($row->id);
         $this->setUsername($row->username);
+        $this->setPassword($row->password);
         $this->setEmail($row->email);
         $this->setFirstName($row->firstName);
         $this->setLastName($row->lastName);
@@ -280,49 +275,17 @@ class User
     //         exit;
     // }
 
-
-    public function getDetails($uid)
+    private function getUserByID($id)
     {
-        $uid = intval($uid);
-
-        $this->setId($uid);
         try {
             $this->db->query('SELECT * FROM user where id = :userId');
-            $this->db->bind(':userId', $this->getId());
+            $this->db->bind(':userId', $id);
 
             $row = $this->db->single();
 
-            if ($this->db->rowCount() > 0) {
-                $this->createUserFromRow($row);
-
-                $userArray = array();
-                $userArray[] = $this->returnUserAsArray();
-
-                $returnData = array();
-
-                $returnData['rows_returned'] = $this->db->rowCount();
-                $returnData['user'] = $userArray;
-
-
-                $response = new Response();
-                $response->setHttpStatusCode(200);
-                $response->setSuccess(true);
-                $response->toCache(true);
-                $response->addMessage("User Information Received successfully");
-                $response->setData($returnData);
-                // $response->setData($row);
-                $response->send();
-                exit;
-                // $this->setId($row['id']);
-                // $this->setUsername($row['username']);
-                // $this->setEmail($row['email']);
-                // $this->setFirstName($row['firstName']);
-                // $this->setLastName($row['lastName']);
-                // $this->setDescription($row['description']);
-                // $this->setClass($row['class']);
-                // $this->setFollowers($row['followers']);
-                // $this->setUserCreatedDate($row['userCreatedDate']);
-            } else {
+            if ($this->db->rowCount() > 0)
+                return $row;
+            else {
                 $response = new Response();
                 $response->setHttpStatusCode(404);
                 $response->setSuccess(false);
@@ -331,7 +294,7 @@ class User
                 exit;
             }
         } catch (PDOException $ex) {
-            error_log("Fun->GetUserDet.. :" . $ex, 0);
+            error_log("Fun->GetUserById.. :" . $ex, 0);
             $response = new Response();
             $response->setHttpStatusCode(500);
             $response->setSuccess(false);
@@ -341,25 +304,55 @@ class User
         }
     }
 
+    public function getDetails($uid)
+    {
+        $uid = intval($uid);
 
-    public function userExists()
+        $this->setId($uid);
+
+        $row = $this->getUserByID($this->id);
+
+        $this->createUserFromRow($row);
+
+        $userArray = array();
+        $userArray[] = $this->returnUserAsArray();
+
+        $returnData = array();
+
+        $returnData['rows_returned'] = $this->db->rowCount();
+        $returnData['user'] = $userArray;
+
+
+        $response = new Response();
+        $response->setHttpStatusCode(200);
+        $response->setSuccess(true);
+        $response->toCache(true);
+        $response->addMessage("User Information Received successfully");
+        $response->setData($returnData);
+        $response->send();
+        exit;
+    }
+
+
+    public function userExists($id = null, $username = null)
     {
         try {
-            $this->db->query('SELECT * FROM user where username = :username');
-            $this->db->bind(':username', $this->username);
 
-            // $this->db->execute();
+            if ($id != null) {
+                $this->db->query('SELECT COUNT(*) AS totalCount FROM user where id = :userId');
+                $this->db->bind(':userId', $id);
+            } else {
+                $this->db->query('SELECT COUNT(*) AS totalCount FROM user where username = :username');
+                $this->db->bind(':username', $username);
+            }
+
+            $this->db->execute();
 
             $row = $this->db->single();
-
-            if ($this->db->rowCount() > 0) {
-                $response = new Response();
-                $response->setHttpStatusCode(409);
-                $response->setSuccess(false);
-                $response->addMessage("User already exists");
-                $response->send();
-                exit;
-            }
+            if ($row->totalCount > 0)
+                return true;
+            else
+                return false;
         } catch (PDOException $ex) {
             $response = new Response();
             $response->setHttpStatusCode(500);
@@ -368,15 +361,12 @@ class User
             $response->send();
             exit;
         }
-
-        return false;
     }
 
     public function createNewUser()
     {
-        if (!$this->userExists()) {
+        if (!$this->userExists($this->username)) {
             try {
-
                 $this->db->query('INSERT INTO user(id, username, password, email, firstName, lastName, picture, class, description, followers, userCreatedDate) values (null, :username, :password, :email, :firstName, :lastName, null, :class, :description, :followers, null)');
 
                 $this->db->bind(':username', $this->username);
@@ -448,6 +438,238 @@ class User
                 $response->send();
                 exit;
             }
+        } else {
+            $response = new Response();
+            $response->setHttpStatusCode(409);
+            $response->setSuccess(false);
+            $response->addMessage("User already exists");
+            $response->send();
+            exit;
+        }
+    }
+
+
+    public function updateInfo($uid, $data)
+    {
+        $uid = intval($uid);
+
+
+        $passwordUpdated = false;
+        $emailUpdated = false;
+        $firstNameUpdated = false;
+        $lastNameUpdated = false;
+        $classUpdated = false;
+        $descriptionUpdated = false;
+
+        $queryFields = "";
+
+        if ($this->userExists($uid)) {
+
+            try {
+
+                $this->db->query('SELECT * FROM user where id = :userId');
+                $this->db->bind(':userId', $uid);
+
+                $row = $this->db->single();
+                $this->createUserFromRow($row);
+
+                if (array_key_exists('password', $data)) {
+                    if ((strcmp($data['password'], $this->password)) != 0) {
+                        $passwordUpdated = true;
+                        $this->setPassword($data['password']);
+                        $queryFields .= "password = :password, ";
+                    }
+                }
+
+                if (array_key_exists('email', $data)) {
+                    if ($this->email != null) {
+                        if ((strcmp($data['email'], $this->email)) != 0) {
+                            $emailUpdated = true;
+                            $this->setEmail($data['email']);
+                            $queryFields .= "email = :email, ";
+                        }
+                    } else {
+                        $emailUpdated = true;
+                        $this->setEmail($data['email']);
+                        $queryFields .= "email = :email, ";
+                    }
+                }
+
+                if (array_key_exists('firstName', $data)) {
+                    if ((strcmp($data['firstName'], $this->firstName)) != 0) {
+                        $firstNameUpdated = true;
+                        $this->setFirstName($data['firstName']);
+                        $queryFields .= "firstName = :firstName, ";
+                    }
+                }
+                if (array_key_exists('lastName', $data)) {
+                    if ((strcmp($data['lastName'], $this->lastName)) != 0) {
+                        $lastNameUpdated = true;
+                        $this->setlastName($data['lastName']);
+                        $queryFields .= "lastName = :lastName, ";
+                    }
+                }
+
+                if (array_key_exists('class', $data)) {
+                    if ($this->class != null) {
+                        if ((strcmp($data['class'], $this->class)) != 0) {
+                            $classUpdated = true;
+                            $this->setClass($data['class']);
+                            $queryFields .= "class = :class, ";
+                        }
+                    } else {
+                        $classUpdated = true;
+                        $this->setClass($data['class']);
+                        $queryFields .= "class = :class, ";
+                    }
+                }
+                if (array_key_exists('description', $data)) {
+                    if ($this->description != null) {
+                        if ((strcmp($data['description'], $this->description)) != 0) {
+                            $descriptionUpdated = true;
+                            $this->setDescription($data['description']);
+                            $queryFields .= "description = :description, ";
+                        }
+                    } else {
+                        $descriptionUpdated = true;
+                        $this->setDescription($data['description']);
+                        $queryFields .= "description = :description, ";
+                    }
+                }
+
+                $queryFields = rtrim($queryFields, ", ");
+
+                if (!$passwordUpdated && !$emailUpdated && !$firstNameUpdated && !$lastNameUpdated && !$classUpdated && !$descriptionUpdated) {
+                    $response = new Response();
+                    $response->setHttpStatusCode(400);
+                    $response->setSuccess(false);
+                    $response->addMessage("No new information to update");
+                    $response->send();
+                    exit;
+                }
+
+
+                $this->db->query("UPDATE user SET " . $queryFields . " WHERE id = :userId");
+
+                $this->db->bind(":userId", $this->id);
+
+                if ($passwordUpdated)
+                    $this->db->bind(":password", $this->password);
+
+                if ($emailUpdated)
+                    $this->db->bind(":email", $this->email);
+
+                if ($firstNameUpdated)
+                    $this->db->bind(":firstName", $this->firstName);
+
+                if ($lastNameUpdated)
+                    $this->db->bind(":lastName", $this->lastName);
+
+                if ($classUpdated)
+                    $this->db->bind(":class", $this->class);
+
+                if ($descriptionUpdated)
+                    $this->db->bind(":description", $this->description);
+
+                $this->db->execute();
+
+                if ($this->db->rowCount() > 0) {
+
+                    $row = $this->getUserByID($this->id);
+
+                    $this->createUserFromRow($row);
+
+                    $userArray = array();
+                    $userArray[] = $this->returnUserAsArray();
+
+                    $returnData = array();
+
+                    $returnData['rows_returned'] = $this->db->rowCount();
+                    $returnData['user'] = $userArray;
+
+                    $response = new Response();
+                    $response->setHttpStatusCode(200);
+                    $response->setSuccess(true);
+                    $response->addMessage("User Information Updated successfully");
+                    $response->setData($returnData);
+                    $response->send();
+                    exit;
+                } else {
+                    $response = new Response();
+                    $response->setHttpStatusCode(500);
+                    $response->setSuccess(false);
+                    $response->addMessage("Something went wrong, please try again");
+                    $response->send();
+                    exit;
+                }
+            } catch (UserException $ex) {
+                $response = new Response();
+                $response->setHttpStatusCode(400);
+                $response->setSuccess(false);
+                $response->addMessage($ex->getMessage());
+                $response->send();
+                exit;
+            } catch (PDOException $ex) {
+                error_log('fun updateUser -->: ' . $ex, 0);
+                $response = new Response();
+                $response->setHttpStatusCode(500);
+                $response->setSuccess(false);
+                $response->addMessage("Database Error !!");
+                $response->send();
+                exit;
+            }
+        } else {
+            $response = new Response();
+            $response->setHttpStatusCode(404);
+            $response->setSuccess(false);
+            $response->addMessage("User not found");
+            $response->send();
+            exit;
+        }
+    }
+
+
+    public function deleteUser($uid)
+    {
+        $uid = intval($uid);
+        if ($this->userExists($uid)) {
+            try {
+                $this->db->query('DELETE FROM user WHERE id = :userId');
+                $this->db->bind(':userId', $uid);
+                // $this->db->execute();
+
+                if ($this->db->execute()) {
+                    // if ($this->db->rowCount() > 0) {
+                    $response = new Response();
+                    $response->setHttpStatusCode(200);
+                    $response->setSuccess(true);
+                    $response->addMessage("User Deleted Successfully");
+                    $response->send();
+                    exit;
+                } else {
+                    $response = new Response();
+                    $response->setHttpStatusCode(500);
+                    $response->setSuccess(false);
+                    $response->addMessage("Couldn't delete user");
+                    $response->send();
+                    exit;
+                }
+            } catch (PDOException $ex) {
+                error_log('fun DeleteUser -->: ' . $ex, 0);
+                $response = new Response();
+                $response->setHttpStatusCode(500);
+                $response->setSuccess(false);
+                $response->addMessage("Database Error !!");
+                $response->send();
+                exit;
+            }
+        } else {
+            $response = new Response();
+            $response->setHttpStatusCode(404);
+            $response->setSuccess(false);
+            $response->addMessage("User not found");
+            $response->send();
+            exit;
         }
     }
 }

@@ -3,7 +3,8 @@ RewriteCond %{REQUEST_FILENAME} !-d
 RewriteCond %{REQUEST_FILENAME} !-f
 
 
-RewriteRule ^users/([0-9]+)$ api/v1/controllers/users.php?user=$1 [L]
 RewriteRule ^users$ api/v1/controllers/users.php [L]
+RewriteRule ^users/([0-9]+)$ api/v1/controllers/users.php?user=$1 [L]
 
 RewriteRule ^sessions$ api/v1/controllers/sessions.php [L]
+RewriteRule ^sessions/([0-9]+)$ api/v1/controllers/sessions.php?session=$1 [L]

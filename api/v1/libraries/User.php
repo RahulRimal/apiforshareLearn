@@ -106,7 +106,7 @@ class User
         // {
 
         // }
-        if ($id == null)
+        if (is_null($id))
             throw new UserException('User Id cannot be null');
 
         if (!is_numeric($id))
@@ -124,7 +124,7 @@ class User
 
     public function setUsername($username)
     {
-        if ($username == null)
+        if (is_null($username))
             throw new UserException('Username can\'t be null ');
 
         elseif ($username == '')
@@ -142,7 +142,7 @@ class User
 
     public function setPassword($password)
     {
-        if ($password == null)
+        if (is_null($password))
             throw new UserException('Password can\'t be null');
         elseif (strlen($password) < 8)
             throw new UserException('Password must be at least 8 characters long');
@@ -338,7 +338,7 @@ class User
     {
         try {
 
-            if ($id != null) {
+            if (!is_null($id)) {
                 $this->db->query('SELECT COUNT(*) AS totalCount FROM user where id = :userId');
                 $this->db->bind(':userId', $id);
             } else {
@@ -482,7 +482,7 @@ class User
                 }
 
                 if (array_key_exists('email', $data)) {
-                    if ($this->email != null) {
+                    if (!is_null($this->email)) {
                         if ((strcmp($data['email'], $this->email)) != 0) {
                             $emailUpdated = true;
                             $this->setEmail($data['email']);
@@ -511,7 +511,7 @@ class User
                 }
 
                 if (array_key_exists('class', $data)) {
-                    if ($this->class != null) {
+                    if (!is_null($this->class)) {
                         if ((strcmp($data['class'], $this->class)) != 0) {
                             $classUpdated = true;
                             $this->setClass($data['class']);
@@ -524,7 +524,7 @@ class User
                     }
                 }
                 if (array_key_exists('description', $data)) {
-                    if ($this->description != null) {
+                    if (!is_null($this->description)) {
                         if ((strcmp($data['description'], $this->description)) != 0) {
                             $descriptionUpdated = true;
                             $this->setDescription($data['description']);
@@ -672,4 +672,5 @@ class User
             exit;
         }
     }
+
 }

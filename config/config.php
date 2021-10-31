@@ -11,3 +11,5 @@ define("SITE_TITLE", "Share Your Learning");
 // define ('BASE_URI', 'http://'.$_SERVER['SERVER_NAME'].'/shareLearning/');
 
 define ('BASE_URI', 'http://'.$_SERVER['SERVER_NAME'].'/ProjectShareBooks/');
+
+date_default_timezone_set("Asia/Kathmandu");

@@ -4,8 +4,6 @@ class PostException extends Exception
 {
 }
 
-
-
 class Post
 {
     private $db;
@@ -206,7 +204,7 @@ class Post
             $this->postedOn = $postedOn;
     }
 
-    public function createPostFromRow($row)
+    public function setPostFromRow($row)
     {
         $this->setId($row->id);
         $this->setUserId($row->userId);
@@ -220,16 +218,17 @@ class Post
         $this->setPostedOn($row->postedOn);
     }
 
-    public function createPostFromArray($data)
+    public function setPostFromArray($data)
     {
-        $this->setBookName($data->bookName);
-        isset($data->author) ? $this->setAuthor($data->author) : $this->setAuthor(null);
-        $this->setDescription($data->description);
-        $this->setBoughtDate($data->boughtDate);
-        $this->setPrice($data->price);
-        $this->setPostType($data->postType);
-        isset($data->postRating) ? $this->setPostRating($data->postRating) : $this->setPostRating(null);
-        $this->setPostedOn($data->postedOn);
+        isset($data['bookName']) ?
+            $this->setBookName($data['bookName']) : false;
+        isset($data['author']) ? $this->setAuthor($data['author']) : $this->setAuthor(null);
+        isset($data['description']) ? $this->setDescription($data['description']) : false;
+        isset($data['boughtDate']) ? $this->setBoughtDate($data['boughtDate']) : false;
+        isset($data['price']) ? $this->setPrice($data['price']) : false;
+        isset($data['postType']) ? $this->setPostType($data['postType']) : false;
+        isset($data['postRating']) ? $this->setPostRating($data['postRating']) : $this->setPostRating(null);
+        isset($data['postedOn']) ? $this->setPostedOn($data['postedOn']) : false;
     }
 
     public function returnPostAsArray()
@@ -250,6 +249,35 @@ class Post
         return $post;
     }
 
+    private function getPost($id)
+    {
+        try {
+            $this->db->query('SELECT * FROM post where id = :postId');
+            $this->db->bind(':postId', $id);
+
+            $row = $this->db->single();
+
+            if ($this->db->rowCount() > 0)
+                return $row;
+            else {
+                $response = new Response();
+                $response->setHttpStatusCode(404);
+                $response->setSuccess(false);
+                $response->addMessage("Post not found");
+                $response->send();
+                exit;
+            }
+        } catch (PDOException $ex) {
+            error_log("Fun->GetUserById.. :" . $ex, 0);
+            $response = new Response();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage("Couldn't retrieve data from database");
+            $response->send();
+            exit;
+        }
+    }
+
     public function getUserPost($uid)
     {
         try {
@@ -265,7 +293,7 @@ class Post
                 $postArray = array();
 
                 foreach ($rows as $row) {
-                    $this->createPostFromRow($row);
+                    $this->setPostFromRow($row);
 
                     $postArray[] = $this->returnPostAsArray();
                 }
@@ -321,7 +349,7 @@ class Post
 
             if ($this->db->rowCount() > 0) {
 
-                $this->createPostFromRow($row);
+                $this->setPostFromRow($row);
 
                 $postArray[] = $this->returnPostAsArray();
 
@@ -362,24 +390,37 @@ class Post
         }
     }
 
-    public function postOfUserExists($uid, $bookName)
+    public function postExists($uid, $bookId = null, $bookName = null)
     {
         try {
             $this->setUserId($uid);
-            $this->setBookName($bookName);
+            if (!is_null($bookId)) {
 
-            $this->db->query('SELECT COUNT(id) as totalCount FROM post where userId = :userId AND bookName = :book');
+                $this->setId($bookId);
+                $this->db->query('SELECT COUNT(id) as totalCount FROM post where userId = :userId AND id = :bookId');
 
-            $this->db->bind(':userId', $this->userId);
-            $this->db->bind(':book', $this->bookName);
+                $this->db->bind(':userId', $this->userId);
+                $this->db->bind(':bookId', $this->id);
+            } elseif (!is_null($bookName)) {
+                $this->setBookName($bookName);
+                $this->db->query('SELECT COUNT(id) as totalCount FROM post where userId = :userId AND bookName = :book');
 
+                $this->db->bind(':userId', $this->userId);
+                $this->db->bind(':book', $this->bookName);
+            } else {
+                $response = new Response();
+                $response->setHttpStatusCode(400);
+                $response->setSuccess(false);
+                $response->addMessage("Something went wrong, please try again");
+                $response->send();
+                exit;
+            }
             $row = $this->db->single();
 
-            if($row->totalCount > 0)
+            if ($row->totalCount > 0)
                 return true;
-            
-            return false;
 
+            return false;
         } catch (PostException $ex) {
             $response = new Response();
             $response->setHttpStatusCode(400);
@@ -396,17 +437,17 @@ class Post
             $response->send();
             exit;
         }
-    } 
+    }
     public function createPost($uid, $data)
     {
         $uid = intval($uid);
 
         try {
             $this->setUserId($uid);
-            $data->postedOn = date("Y-m-d H:i:s");
-            $this->createPostFromArray($data);
+            $data['postedOn'] = date("Y-m-d H:i:s");
+            $this->setPostFromArray($data);
 
-            if ($this->postOfUserExists($this->userId, $this->bookName)) {
+            if ($this->postExists($this->userId, null, $this->bookName)) {
                 $response = new Response();
                 $response->setHttpStatusCode(400);
                 $response->setSuccess(false);
@@ -426,10 +467,11 @@ class Post
             $this->db->bind(':postType', $this->postType);
             $this->db->bind(':postRating', $this->postRating);
 
-            if ($this->db->execute()) {
+            if ($this->db->execute()) { 
                 $postId = $this->db->lastInsertId();
+                $this->setId($postId);
 
-                if (is_null($postId)) {
+                if (is_null($this->id)) {
                     $response = new Response();
                     $response->setHttpStatusCode(500);
                     $response->setSuccess(false);
@@ -439,7 +481,7 @@ class Post
                 }
 
                 $this->db->query('SELECT * FROM  post where id = :postId');
-                $this->db->bind(':postId', $postId);
+                $this->db->bind(':postId', $this->id);
 
                 $row = $this->db->single();
 
@@ -452,7 +494,7 @@ class Post
                     exit;
                 }
 
-                $this->createPostFromRow($row);
+                $this->setPostFromRow($row);
 
                 $userArray = array();
 
@@ -474,6 +516,250 @@ class Post
                 $response->setHttpStatusCode(500);
                 $response->setSuccess(false);
                 $response->addMessage("Error creating new post, please try again");
+                $response->send();
+                exit;
+            }
+        } catch (PostException $ex) {
+            $response = new Response();
+            $response->setHttpStatusCode(400);
+            $response->setSuccess(false);
+            $response->addMessage($ex->getMessage());
+            $response->send();
+            exit;
+        } catch (PDOException $ex) {
+            error_log("Fun getUsersPost: " . $ex, 0);
+            $response = new Response();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage("Database Error");
+            $response->send();
+            exit;
+        }
+    }
+
+
+    public function updatePost($id, $data)
+    {
+        try {
+            $data['userId'] = intval($data['userId']);
+            $this->setUserId($data['userId']);
+            $this->setId($id);
+
+            $this->setPostFromArray($data);
+
+            if (!$this->postExists($this->userId, $this->id)) {
+                $response = new Response();
+                $response->setHttpStatusCode(404);
+                $response->setSuccess(false);
+                $response->addMessage("Couldn't find the post to update");
+                $response->send();
+                exit;
+            }
+
+            $bookNameUpdated = false;
+            $authorUpdated = false;
+            $descriptionUpdated = false;
+            $boughtDateUpdated = false;
+            $priceUpdated = false;
+            $postTypeUpdated = false;
+            $postRatingUpdated = false;
+
+            $queryFields = "";
+
+            $this->db->query('SELECT * FROM post where id = :postId');
+            $this->db->bind(':postId', $this->id);
+
+            $row = $this->db->single();
+
+            $this->setPostFromRow($row);
+
+            if (array_key_exists('bookName', $data)) {
+                if ((strcmp($data['bookName'], $this->bookName)) != 0) {
+                    $bookNameUpdated = true;
+                    $this->setBookName($data['bookName']);
+                    $queryFields .= "bookName = :bookName, ";
+                }
+            }
+
+            if (array_key_exists('author', $data)) {
+                if (!is_null($this->author)) {
+                    if ((strcmp($data['author'], $this->author)) != 0) {
+                        $authorUpdated = true;
+                        $this->setAuthor($data['author']);
+                        $queryFields .= "author = :author, ";
+                    }
+                } else {
+                    $authorUpdated = true;
+                    $this->setAuthor($data['author']);
+                    $queryFields .= "author = :author, ";
+                }
+            }
+
+            if (array_key_exists('description', $data)) {
+                if ((strcmp($data['description'], $this->description)) != 0) {
+                    $descriptionUpdated = true;
+                    $this->setDescription($data['description']);
+                    $queryFields .= "description = :description, ";
+                }
+            }
+
+            if (array_key_exists('boughtDate', $data)) {
+                if ((strcmp($data['boughtDate'], $this->boughtDate)) != 0) {
+                    $boughtDateUpdated = true;
+                    $this->setBoughtDate($data['boughtDate']);
+                    $queryFields .= "boughtDate = :boughtDate, ";
+                }
+            }
+
+            if (array_key_exists('price', $data)) {
+                if ((strcmp($data['price'], $this->price)) != 0) {
+                    $priceUpdated = true;
+                    $this->setPrice($data['price']);
+                    $queryFields .= "price = :price, ";
+                }
+            }
+
+            if (array_key_exists('postType', $data)) {
+                if ((strcmp($data['postType'], $this->postType)) != 0) {
+                    $postTypeUpdated = true;
+                    $this->setPostType($data['postType']);
+                    $queryFields .= "postType = :postType, ";
+                }
+            }
+
+            if (array_key_exists('postRating', $data)) {
+                if (is_null($this->postRating)) {
+                    if ((strcmp($data['postRating'], $this->postRating)) != 0) {
+                        $postRatingUpdated = true;
+                        $this->setPostRating($data['postRating']);
+                        $queryFields .= "postRating = :postRating, ";
+                    }
+                } else {
+                    $postRatingUpdated = true;
+                    $this->setPostRating($data['postRating']);
+                    $queryFields .= "postRating = :postRating, ";
+                }
+            }
+
+            $queryFields = rtrim($queryFields, ", ");
+
+            if (!$bookNameUpdated && !$authorUpdated && !$descriptionUpdated && !$boughtDateUpdated && !$priceUpdated && !$postTypeUpdated && !$postRatingUpdated) {
+                $response = new Response();
+                $response->setHttpStatusCode(400);
+                $response->setSuccess(false);
+                $response->addMessage("No new information to update");
+                $response->send();
+                exit;
+            }
+
+            $this->db->query("UPDATE post SET " . $queryFields . " WHERE id = :postId");
+            $this->db->bind(':postId', $this->id);
+
+            if ($bookNameUpdated)
+                $this->db->bind(':bookName', $this->bookName);
+
+            if ($authorUpdated)
+                $this->db->bind(':author', $this->author);
+
+            if ($descriptionUpdated)
+                $this->db->bind(':description', $this->description);
+
+            if ($boughtDateUpdated)
+                $this->db->bind(':boughtDate', $this->boughtDate);
+
+            if ($priceUpdated)
+                $this->db->bind(':price', $this->price);
+
+
+            if ($postTypeUpdated)
+                $this->db->bind(':postType', $this->postType);
+
+
+            if ($postRatingUpdated)
+                $this->db->bind(':postRating', $this->postRating);
+
+            $this->db->execute();
+
+            if ($this->db->rowCount() > 0) {
+
+                $row = $this->getPost($this->id);
+
+                $this->setPostFromRow($row);
+
+                $postArray = array();
+                $postArray[] = $this->returnPostAsArray();
+
+                $returnData = array();
+
+                $returnData['rows_returned'] = $this->db->rowCount();
+                $returnData['posts'] = $postArray;
+
+                $response = new Response();
+                $response->setHttpStatusCode(200);
+                $response->setSuccess(true);
+                $response->addMessage("Post Information Updated successfully");
+                $response->setData($returnData);
+                $response->send();
+                exit;
+            } else {
+                $response = new Response();
+                $response->setHttpStatusCode(500);
+                $response->setSuccess(false);
+                $response->addMessage("Something went wrong, please try again");
+                $response->send();
+                exit;
+            }
+        } catch (PostException $ex) {
+            $response = new Response();
+            $response->setHttpStatusCode(400);
+            $response->setSuccess(false);
+            $response->addMessage($ex->getMessage());
+            $response->send();
+            exit;
+        } catch (PDOException $ex) {
+            error_log("Fun getUsersPost: " . $ex, 0);
+            $response = new Response();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage("Database Error");
+            $response->send();
+            exit;
+        }
+    }
+
+    public function deletePost($id, $uid)
+    {
+        $id = intval($id);
+        $uid = intval($uid);
+        try {
+            $this->setId($id);
+            $this->setUserId($uid);
+
+            if (!$this->postExists($this->userId, $this->id)) {
+                $response = new Response();
+                $response->setHttpStatusCode(404);
+                $response->setSuccess(false);
+                $response->addMessage("Couldn't find the post to delete");
+                $response->send();
+                exit;
+            }
+
+            $this->db->query('DELETE FROM post WHERE id = :postId AND userId = :userId');
+            $this->db->bind(':postId', $this->id);
+            $this->db->bind(':userId', $this->userId);
+
+            if ($this->db->execute()) {
+                $response = new Response();
+                $response->setHttpStatusCode(200);
+                $response->setSuccess(true);
+                $response->addMessage("Post Deleted Successfully");
+                $response->send();
+                exit;
+            } else {
+                $response = new Response();
+                $response->setHttpStatusCode(500);
+                $response->setSuccess(false);
+                $response->addMessage("Couldn't delete the post");
                 $response->send();
                 exit;
             }

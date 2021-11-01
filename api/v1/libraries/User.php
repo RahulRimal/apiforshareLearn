@@ -244,7 +244,7 @@ class User
         return $user;
     }
 
-    public function createUserFromRow($row)
+    public function setUserFromRow($row)
     {
         $this->setId($row->id);
         $this->setUsername($row->username);
@@ -312,7 +312,7 @@ class User
 
         $row = $this->getUserByID($this->id);
 
-        $this->createUserFromRow($row);
+        $this->setUserFromRow($row);
 
         $userArray = array();
         $userArray[] = $this->returnUserAsArray();
@@ -404,7 +404,7 @@ class User
                         exit;
                     }
 
-                    $this->createUserFromRow($row);
+                    $this->setUserFromRow($row);
 
                     $userArray = array();
 
@@ -471,7 +471,7 @@ class User
                 $this->db->bind(':userId', $uid);
 
                 $row = $this->db->single();
-                $this->createUserFromRow($row);
+                $this->setUserFromRow($row);
 
                 if (array_key_exists('password', $data)) {
                     if ((strcmp($data['password'], $this->password)) != 0) {
@@ -577,7 +577,7 @@ class User
 
                     $row = $this->getUserByID($this->id);
 
-                    $this->createUserFromRow($row);
+                    $this->setUserFromRow($row);
 
                     $userArray = array();
                     $userArray[] = $this->returnUserAsArray();

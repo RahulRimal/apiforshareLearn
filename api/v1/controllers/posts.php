@@ -80,7 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
     $uId = $sess->getUserId();
 
-    if(!isset($jsonData->bookName) || !isset($jsonData->description) || !isset($jsonData->boughtDate) || !isset($jsonData->price) || !isset($jsonData->postType) || !isset($jsonData->postedOn)) {
+    if (!isset($jsonData->bookName) || !isset($jsonData->description) || !isset($jsonData->boughtDate) || !isset($jsonData->price) || !isset($jsonData->postType) || !isset($jsonData->postedOn)) {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
@@ -94,9 +94,115 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         exit;
     }
 
-    $post = new Post();
-    $post->createPost($uId, $jsonData);
+    $data = array();
 
+    if(isset($jsonData->bookName))
+        $data['bookName'] = $jsonData->bookName;
+
+        if(isset($jsonData->author))
+        $data['author'] = $jsonData->author;
+
+        if(isset($jsonData->description))
+        $data['description'] = $jsonData->description;
+
+        if(isset($jsonData->boughtDate))
+        $data['boughtDate'] = $jsonData->boughtDate;
+
+        if(isset($jsonData->price))
+        $data['price'] = $jsonData->price;
+
+        if(isset($jsonData->postType))
+        $data['postType'] = $jsonData->postType;
+
+        if(isset($jsonData->postRating))
+        $data['postRating'] = $jsonData->postRating;
+
+
+    $post = new Post();
+    $post->createPost($uId, $data);
+} elseif ($_SERVER['REQUEST_METHOD'] == 'PATCH') {
+    if ($_SERVER['CONTENT_TYPE'] != 'application/json') {
+        $response = new Response();
+        $response->setHttpStatusCode(400);
+        $response->setSuccess(false);
+        $response->addMessage("Header type not set to JSON");
+        $response->send();
+        exit;
+    }
+
+    $rawData = file_get_contents('php://input');
+
+    if (!$jsonData = json_decode($rawData)) {
+        $response = new Response();
+        $response->setHttpStatusCode(400);
+        $response->setSuccess(false);
+        $response->addMessage("Invalid JSON body");
+        $response->send();
+        exit;
+    }
+
+    $sess = new Session();
+
+    $sess = $sess->getSessionInfo($accessToken);
+
+    $uId = $sess->getUserId();
+
+    if (isset($_GET['post'])) {
+
+        $id = $_GET['post'];
+
+        $data = array();
+        $data['userId'] = $uId;
+
+        if (isset($jsonData->bookName) || isset($jsonData->author) || isset($jsonData->description) || isset($jsonData->boughtDate) || isset($jsonData->price) || isset($jsonData->postType) || isset($jsonData->postRating)) {
+            isset($jsonData->bookName) ? $data['bookName'] = $jsonData->bookName : false;
+            isset($jsonData->author) ? $data['author'] = $jsonData->author : false;
+            isset($jsonData->description) ? $data['description'] = $jsonData->description : false;
+            isset($jsonData->boughtDate) ? $data['boughtDate'] = $jsonData->boughtDate : false;
+            isset($jsonData->price) ? $data['price'] = $jsonData->price : false;
+            isset($jsonData->postType) ? $data['postType'] = $jsonData->postType : false;
+            isset($jsonData->postRating) ? $data['postRating'] = $jsonData->postRating : false;
+
+            $post = new Post();
+            $post->updatePost($id, $data);
+        } else {
+            $response = new Response();
+            $response->setHttpStatusCode(400);
+            $response->setSuccess(false);
+            $response->addMessage("Nothing changed to update");
+            $response->send();
+            exit;
+        }
+    } else {
+        $response = new Response();
+        $response->setHttpStatusCode(400);
+        $response->setSuccess(false);
+        $response->addMessage("Post ID required to update the post");
+        $response->send();
+        exit;
+    }
+} elseif ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
+
+    $sess = new Session();
+
+    $sess = $sess->getSessionInfo($accessToken);
+
+    $uId = $sess->getUserId();
+
+    if (isset($_GET['post'])) {
+
+        $id = $_GET['post'];
+
+        $post = new Post();
+        $post->deletePost($id, $uId);
+    } else {
+        $response = new Response();
+        $response->setHttpStatusCode(400);
+        $response->setSuccess(false);
+        $response->addMessage("Post ID required to delete the post");
+        $response->send();
+        exit;
+    }
 } else {
     $response = new Response();
     $response->setHttpStatusCode(405);

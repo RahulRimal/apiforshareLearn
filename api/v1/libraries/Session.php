@@ -166,7 +166,7 @@ class Session
         $sessionData = array();
 
         $sessionData['id'] = $this->id;
-        // $sessionData['userId'] = $this->userId;
+        $sessionData['userId'] = $this->userId;
         $sessionData['accessToken'] = $this->accessToken;
         $sessionData['accessTokenExpiry'] = $this->accessTokenExpiryTime;
         $sessionData['refreshToken'] = $this->refreshToken;
@@ -325,14 +325,13 @@ class Session
             $this->setSessionFromRow($row);
 
             if ($this->hasExpired($this->accessTokenExpiryTime)) {
-                if($this->hasExpired($this->refreshTokenExpiryTime))
-                {
+                if ($this->hasExpired($this->refreshTokenExpiryTime)) {
                     $response = new Response();
-                $response->setHttpStatusCode(400);
-                $response->setSuccess(false);
-                $response->addMessage('Expired token, please log in again');
-                $response->send();
-                exit;
+                    $response->setHttpStatusCode(400);
+                    $response->setSuccess(false);
+                    $response->addMessage('Expired token, please log in again');
+                    $response->send();
+                    exit;
                 }
                 // $this->updateSession($this->refreshToken);
                 $this->setAccessToken(base64_encode(bin2hex(openssl_random_pseudo_bytes(24) . time())));
@@ -351,8 +350,7 @@ class Session
 
                 $this->db->execute();
 
-                if($this->db->rowCount() == 0)
-                {
+                if ($this->db->rowCount() == 0) {
                     $response = new Response();
                     $response->setHttpStatusCode(500);
                     $response->setSuccess(false);
@@ -362,10 +360,8 @@ class Session
                 }
 
                 return $this;
-
             }
             return $this;
-
         } catch (SessionException $ex) {
             $response = new Response();
             $response->setHttpStatusCode(500);
@@ -545,7 +541,7 @@ class Session
             $row = $this->db->single();
 
             if ($this->db->rowCount() > 0) {
-                $user->createUserFromRow($row);
+                $user->setUserFromRow($row);
                 $this->createSession($user);
             } else {
                 $response = new Response();

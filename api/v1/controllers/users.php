@@ -108,7 +108,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             isset($jsonData->lastName) ? $receivedData['lastName'] = $jsonData->lastName : false;
             isset($jsonData->class) ? $receivedData['class'] = $jsonData->class : false;
             isset($jsonData->description) ? $receivedData['description'] = $jsonData->description : false;
-
             $user->updateInfo($uId, $receivedData);
         }
         else

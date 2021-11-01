@@ -116,10 +116,11 @@ class Session
 
         else {
 
-            if($this->hasExpired($tokenTime))
-                throw new SessionException('Access token expiry time must be future');
-            else
-                $this->accessTokenExpiryTime = $tokenTime;
+            // if ($this->hasExpired($tokenTime))
+            //     // throw new SessionException('Access token expiry time must be future');
+            //     $this->updateSession($this->refreshToken);
+            //     else
+            $this->accessTokenExpiryTime = $tokenTime;
         }
     }
 
@@ -140,23 +141,23 @@ class Session
             throw new SessionException('Refresh token expiry time can\'t be null');
         elseif (empty($tokenTime))
             throw new SessionException('Refresh token expiry time can\'t be empty');
-        
+
         else {
-            if($this->hasExpired($tokenTime))
-                throw new SessionException('Access token expiry time must be future');
-            else
-                $this->refreshTokenExpiryTime = $tokenTime;
+            // if ($this->hasExpired($tokenTime))
+            //     throw new SessionException('Access token expiry time must be future');
+            // else
+            $this->refreshTokenExpiryTime = $tokenTime;
         }
     }
 
 
-    public function createSessionFromRow($row)
+    public function setSessionFromRow($row)
     {
         $this->setId($row->id);
         $this->setUserId($row->userId);
+        $this->setRefreshToken($row->refreshToken);
         $this->setAccessToken($row->accessToken);
         $this->setAccessTokenExpiry($row->accessTokenExpiry);
-        $this->setRefreshToken($row->refreshToken);
         $this->setRefreshTokenExpiry($row->refreshTokenExpiry);
     }
 
@@ -206,7 +207,7 @@ class Session
         }
     }
 
-    public function createSessionFromRefreshToken($refreshToken)
+    public function setSessionFromRefreshToken($refreshToken)
     {
 
         try {
@@ -217,7 +218,7 @@ class Session
 
             if ($this->db->rowCount() > 0) {
 
-                $this->createSessionFromRow($row);
+                $this->setSessionFromRow($row);
             } else {
                 $response = new Response();
                 $response->setHttpStatusCode(404);
@@ -266,7 +267,7 @@ class Session
             if ($this->db->rowCount() > 0) {
                 $row = $this->db->single();
 
-                $this->createSessionFromRow($row);
+                $this->setSessionFromRow($row);
 
                 $sessionArray =  array();
 
@@ -296,6 +297,88 @@ class Session
             $response->setHttpStatusCode(500);
             $response->setSuccess(false);
             $response->addMessage("Something went wrong, please try again");
+            $response->send();
+            exit;
+        }
+    }
+
+    public function getSessionInfo($accessToken)
+    {
+        try {
+            $this->setAccessToken($accessToken);
+
+            $this->db->query('SELECT * FROM sessions WHERE accessToken = :accessToken');
+            $this->db->bind(':accessToken', $accessToken);
+
+            $row = $this->db->single();
+
+            if ($this->db->rowCount() == 0) {
+
+                $response = new Response();
+                $response->setHttpStatusCode(400);
+                $response->setSuccess(false);
+                $response->addMessage('Error getting session information, please check access token');
+                $response->send();
+                exit;
+            }
+
+            $this->setSessionFromRow($row);
+
+            if ($this->hasExpired($this->accessTokenExpiryTime)) {
+                if($this->hasExpired($this->refreshTokenExpiryTime))
+                {
+                    $response = new Response();
+                $response->setHttpStatusCode(400);
+                $response->setSuccess(false);
+                $response->addMessage('Expired token, please log in again');
+                $response->send();
+                exit;
+                }
+                // $this->updateSession($this->refreshToken);
+                $this->setAccessToken(base64_encode(bin2hex(openssl_random_pseudo_bytes(24) . time())));
+                $this->setAccessTokenExpiry($this->getDateFromSeconds(1200));
+                $this->setRefreshToken(base64_encode(bin2hex(openssl_random_pseudo_bytes(24) . time())));
+                $this->setRefreshTokenExpiry($this->getDateFromSeconds(1209600));
+
+                $this->db->query('UPDATE sessions set accessToken = :accessToken, accessTokenExpiry = :accessTokenExpiry, refreshToken = :refreshToken, refreshTokenExpiry = :refreshTokenExpiry WHERE id = :sessionId and userId = :userId');
+
+                $this->db->bind(':sessionId', $this->id);
+                $this->db->bind(':userId', $this->userId);
+                $this->db->bind(':accessToken', $this->accessToken);
+                $this->db->bind(':accessTokenExpiry', $this->accessTokenExpiryTime);
+                $this->db->bind(':refreshToken', $this->refreshToken);
+                $this->db->bind(':refreshTokenExpiry', $this->refreshTokenExpiryTime);
+
+                $this->db->execute();
+
+                if($this->db->rowCount() == 0)
+                {
+                    $response = new Response();
+                    $response->setHttpStatusCode(500);
+                    $response->setSuccess(false);
+                    $response->addMessage("Couldn\'t get session information, please try again");
+                    $response->send();
+                    exit;
+                }
+
+                return $this;
+
+            }
+            return $this;
+
+        } catch (SessionException $ex) {
+            $response = new Response();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage($ex->getMessage());
+            $response->send();
+            exit;
+        } catch (PDOException $ex) {
+            error_log("Fun UpdateSession: " . $ex, 0);
+            $response = new Response();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage("Database Error");
             $response->send();
             exit;
         }
@@ -351,14 +434,14 @@ class Session
         try {
             $this->setRefreshToken($refreshToken);
 
-            $this->createSessionFromRefreshToken($refreshToken);
+            $this->setSessionFromRefreshToken($refreshToken);
 
-            
-            if($this->hasExpired($this->refreshTokenExpiryTime)) {
+
+            if ($this->hasExpired($this->refreshTokenExpiryTime)) {
                 $response = new Response();
                 $response->setHttpStatusCode(400);
                 $response->setSuccess(false);
-                $response->addMessage("Expired Refresh token, please log in again");
+                $response->addMessage("Expired token, please log in again");
                 $response->send();
                 exit;
             }

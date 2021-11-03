@@ -575,4 +575,9 @@ class Session
             exit;
         }
     }
+
+
+
+    //php function to get current time
+    
 }

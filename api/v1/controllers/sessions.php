@@ -13,13 +13,13 @@ require_once('../libraries/Response.php');
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     sleep(1);
 
-    if ($_SERVER['CONTENT_TYPE'] != 'application/json') {
-        $response = new Response();
-        $response->setHttpStatusCode(400);
-        $response->setSuccess(false);
-        $response->addMessage("Header type not set to JSON");
-        $response->send();
-        exit;
+        if (isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE'] != 'application/json') {
+            $response = new Response();
+            $response->setHttpStatusCode(400);
+            $response->setSuccess(false);
+            $response->addMessage("Header type not set to JSON");
+            $response->send();
+            exit;
     }
 
     $rawData = file_get_contents('php://input');

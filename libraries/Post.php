@@ -12,30 +12,30 @@ class Post
 
     public function getSellingPostsCount($uid)
     {
-        $this->db->query("SELECT * FROM post WHERE userId = :userId
-                          AND postType = :postTypeTag    
-                        ");
 
+        $this->db->query("SELECT * FROM post WHERE userId = :userId");
         $this->db->bind(':userId', $uid);
-        $this->db->bind(':postTypeTag', 0);
 
         $rows = $this->db->resultset();
-
+        
         return $this->db->rowCount();
+
     }
 
     public function getBuyingPostsCount($uid)
     {
-        $this->db->query("SELECT * FROM post WHERE userId = :userId
-                          AND postType = :postTypeTag    
-                        ");
+
+        $this->db->query("SELECT wishlisted FROM user WHERE id = :userId");
 
         $this->db->bind(':userId', $uid);
-        $this->db->bind(':postTypeTag', 1);
 
-        $rows = $this->db->resultset();
+        $wishlist = $this->db->single();
 
-        return $this->db->rowCount();
+        $wishlistList = $wishlist->wishlisted;
+
+        $wishlistList = explode(',', $wishlistList);
+
+        return count($wishlistList);
     }
 
 
@@ -78,10 +78,6 @@ class Post
         return $row;
     }
 
-
-
-
-
     public function userIdFromPost($pid)
     {
         $this->db->query("SELECT userId FROM post WHERE id = :postId");
@@ -110,6 +106,17 @@ class Post
         else
             return false;
 
+        // if($this->db->execute())
+        //     {
+        //         echo '<script>alert("Your reply has been posted.");</script>';
+        //         die();
+        //     }
+        // else
+        //     {
+        //         echo '<script>alert("Something went wrong, Please try again.");</script>';
+        //         die();
+        //     }
+
     }
 
 
@@ -127,4 +134,3 @@ class Post
 
 
 }
-?>

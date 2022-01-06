@@ -39,9 +39,9 @@ function displayMessage(){
 			$message_type = $_SESSION['message_type'];
 			//Create Output
 			if ($message_type == 'error') {
-				echo '<div class="alert alert-danger text-center">' . $message . '</div>';
+				echo '<div class="custom-alert alert-danger text-center" style="text-decoration: white; font-size: 20px; font-weight: 600; height: 50px; line-height: 50px;">' . $message . '</div>';
 			} else {
-				echo '<div class="alert alert-success text-center">' . $message . '</div>';
+				echo '<div class="custom-alert alert-success text-center" style="text-decoration: white; font-size: 20px; font-weight: 600; height: 50px; line-height: 50px;">' . $message . '</div>';
 			}
 		}
 		//Unset Message

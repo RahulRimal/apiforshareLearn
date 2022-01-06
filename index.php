@@ -22,13 +22,17 @@ if(isLoggedIn())
 
     $template->sellingPostsCount = $post->getSellingPostsCount($uid);
     $template->buyingPostsCount = $post->getBuyingPostsCount($uid);
+
+    $template->userWishlistCount = $user->userWishlistCount($uid);
+
+    isset($_SESSION['nextPerson']) ? $template->nextUserInfo = $user->getUserInfo($_SESSION['nextPerson']) : null;
+
 }
 
 else
 {
     $template->allPosts = $post->getAllPosts();
 }
-
 
 echo $template;
 

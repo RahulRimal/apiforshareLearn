@@ -138,61 +138,14 @@ $(document).ready(function () {
 
 // Alert box show/hide starts here 
 
-$(document).ready(function(){
-  setTimeout(function(){
-    alert = document.getElementsByClassName('alert');
-    alert[0].classList.add('d-none');
-  }, 2000);
+// Header Alert starts here
+
+$(document).ready(function () {
+  $(".custom-alert").fadeTo(2000, 500).slideUp(500, function(){
+    $(".custom-alert").slideUp(500);
+  });
 });
+
+// Header Alert ends here
 
 // Alert box show/hide ends here 
-
-
-
-// Chatbox Starts here
-
-function showChatSystem()
-{
-  chatSystem = document.getElementById('chat-system');
-
-  console.log(chatSystem);
-  chatSystem.classList.remove('d-none');
-  chatSystem.classList.add('d-block');
-  showChatBox();
-}
-
-function hideChatBox()
-{
-  chatBox = document.getElementById('chat-box');
-  chatBox.style.height = 0;
-  showChatHead();
-}
-
-function showChatBox()
-{
-  chatBox = document.getElementById('chat-box');
-  chatBox.style.height = '400px';
-  hideChatHead();
-}
-
-function hideChatHead()
-{
-  chatHead = document.getElementById('chat-head');
-  chatHead.classList.remove('d-block');
-  chatHead.classList.add('d-none');
-
-}
-
-function showChatHead()
-{
-  chatHead = document.getElementById('chat-head');
-  chatHead.classList.remove('d-none');
-  chatHead.classList.add('d-block');
-}
-
-$(document).ready(function()
-{
-  hideChatBox();
-});
-
-// Chatbox ends here

@@ -19,13 +19,17 @@
         <div class="row flex-column-reverse flex-md-row">
 
             <!-- Left sidebar starts here  -->
-
+            <?php if(isset($_GET['nU']))
+            {
+                include('includes/left-sidebar.php');
+            }?>
+                
             <!-- Left sidebar ends here  -->
 
             <!-- main center content starts here  -->
-            <div class="main-center-content me-auto <?php if(isset($_GET['user'])) echo('col-lg-8');
-                else echo('col-lg-12');?> col-lg-8">
-                <div class="user-all-posts">
+            <div class="main-center-content me-auto <?php if(isset($_GET['nU'])) echo('col-lg-8');else echo('col-lg-12');?>">
+            <!-- <div class="main-center-content me-auto col-lg-8">     -->
+            <div class="user-all-posts">
                     <?php foreach($userAllPosts as $post):?>
                     <?php if($post->postType == 0):?>
                     <!-- User post starts here  -->
@@ -170,13 +174,12 @@
             <!-- Right sidebar starts here  -->
 
             <!-- Right sidebar profile card Starts here  -->
-            <?php include('includes/right-sidebar-profile-card.php');?>
+            <?//php include('includes/right-sidebar-profile-card.php');?>
             <!-- Right sidebar profile card ends here  -->
 
             <!-- Right sidebar ends here  -->
 
         </div>
-
 
     </div>
 

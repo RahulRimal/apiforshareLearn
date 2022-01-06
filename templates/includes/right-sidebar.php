@@ -49,11 +49,11 @@
                 <div class="d-flex justify-content-between">
                     <div class="wishlist-title d-flex align-items-center">
                         <i class="fa fa-book me-2" aria-hidden="true"></i>
-                        <a href="#" class="m-0 h6">Wishlisted Books</a>
+                        <a href="<?php echo BASE_URI;?>wishlisted.php" class="m-0 h6">Wishlisted Books</a>
                     </div>
                     <div class="wishlist-post-count">
                         <div style="background-color: var(--primary-color);" class="badge badge-pill">
-                            5
+                            <a id="right-sidebar-wishlisted-count" href="<?php echo BASE_URI;?>wishlisted.php" style="color:white!important;"><?php echo $userWishlistCount;?></a>
                         </div>
                     </div>
                 </div>

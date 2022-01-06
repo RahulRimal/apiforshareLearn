@@ -1,7 +1,11 @@
 :root
 {
-    --primary-color: #f04b35;
-    --primary-bg-color: #F3F5FA;
+    /* --primary-color: #f04b35; */
+    --primary-color: #FA5C65!important;
+    --secondary-color: #007BFF!important;
+    --primary-hover-color: #007BFF!important;
+    /* --secondary-color: #37DC94; */
+    --primary-bg-color: #F3F5FA!important;
 }
 
 
@@ -9,6 +13,35 @@
   padding: 0;
   margin: 0;
 }
+
+
+/* Scrollbar Custom Css starts here */
+
+/* width */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 5px grey; 
+  border-radius: 10px;
+}
+ 
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: var(--primary-hover-color); 
+  border-radius: 10px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: var(--primary-hover-color); 
+}
+
+/* Scrollbar Custom Css starts here */
+
+
 
 /* Important Styling Starts here  */
 
@@ -24,12 +57,14 @@ a {
 
 a:hover {
   text-decoration: none;
+  color: var(--primary-hover-color)!important;
 }
 
 li
 {
     list-style: none;
 }
+
 
 /* Important Styling ends here  */
 
@@ -99,6 +134,12 @@ li
   transition: height 0.8s;
 }
 
+#chat-content-area
+{
+  height: 275px!important;
+  overflow-y: scroll!important;
+}
+
 @media(max-width: 768px)
 {
   #chat-box
@@ -134,7 +175,7 @@ li
 
 /* Topbar starts here */
 #top-bar {
-  background-color: var(--primary-color);
+  background-color: var(--secondary-color)!important;
   height: 35px;
   line-height: 35px;
 }

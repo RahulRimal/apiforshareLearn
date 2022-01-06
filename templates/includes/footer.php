@@ -1,18 +1,37 @@
 <!-- Footer starts here -->
 
 <footer id="footer">
+
+    <!-- Chat system Strats Here -->
+    <?php include('includes/chat-system.php');?>
+    <!-- Chat system Ends Here -->
+
+    <!--Start of Tawk.to Script-->
+    <script type="text/javascript">
+    var Tawk_API=Tawk_API||{}, Tawk_LoadStart=new Date();
+    (function(){
+    var s1=document.createElement("script"),s0=document.getElementsByTagName("script")[0];
+    s1.async=true;
+    s1.src='https://embed.tawk.to/61c2b6e780b2296cfdd2dcfb/1fng9kurr';
+    s1.charset='UTF-8';
+    s1.setAttribute('crossorigin','*');
+    s0.parentNode.insertBefore(s1,s0);
+    })();
+    </script>
+    <!--End of Tawk.to Script-->
+
     <!-- footer newsletter starts here  -->
     <div class="footer-newsletter d-flex justify-content-center text-center mt-5">
         <div class="container col-lg-5">
             <div class="newsletter-heading">
                 <h3>Join Our Newsletter</h3>
             </div>
-            <div class="newsletter-body">
+            <div class="newsletter-body" >
                 <h5>Subscribe now to get exciting offers and latest news!!</h5>
             </div>
             <div class="newsletter-form">
                 <form action="post">
-                    <input class="p-1 ps-3" type="email" name="newEmail" id="newsletter-input">
+                    <input class="p-1 ps-3" type="email" name="newEmail" id="newsletter-input" style="border-color: 2px solid #007BFF!important;">
                     <button class="btn btn-sm text-light" type="submit"><strong>Subscribe</strong></button>
                 </form>
             </div>
@@ -150,8 +169,10 @@
 <!-- Bootstrap Js -->
 <!-- <script src="js/boot/bootstrap.min.js"></script> -->
 
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
+<!-- <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
     integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous">
+</script> -->
+<script src="https://code.jquery.com/jquery-3.5.1.min.js" crossorigin="anonymous">
 </script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.2.1/js/bootstrap.min.js"
     integrity="sha384-B0UglyR+jN6CkvvICOB2joaf5I4l3gm9GU6Hc1og6Ls7i6U/mkkaduKaBhlAXv9k" crossorigin="anonymous">
@@ -164,6 +185,9 @@
 <!-- Custom Js -->
 
 <script src="<?php echo BASE_URI;?>templates/js/script.js"></script>
+<script src="<?php echo BASE_URI;?>templates/js/chat.js"></script>
+<script src="<?php echo BASE_URI;?>templates/js/post.js"></script>
+<script src="<?php echo BASE_URI;?>templates/js/user.js"></script>
 <script src="<?php echo BASE_URI;?>templates/js/boot/bootstrap.min.js"></script>
 
 <!-- LightSlider Js -->

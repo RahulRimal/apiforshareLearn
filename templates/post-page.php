@@ -84,12 +84,12 @@
                                     style="border-radius: 25px;">
                                     <div class="comment-profile mx-4">
                                         <a href="#">
-                                            <img src="<?php echo BASE_URI;?>/images/<?php echo $userInfo->picture;?>"
+                                            <img src="<?php echo BASE_URI;?>/images/<?php echo $nextUserInfo->picture;?>"
                                                 class="circle-avatar" style="height: 50px; width: 50px;">
                                         </a>
                                         <a href="#" class="user-name font-italic h6"
                                             style="color: var(--primary-color);">
-                                            <?php echo ("{$userInfo->firstName} "); echo $userInfo->lastName;?></a>
+                                            <?php echo ("{$nextUserInfo->firstName} "); echo $nextUserInfo->lastName;?></a>
                                     </div>
                                     <div class="comment-text">
                                         <p><?php echo $postComment->body;?></p>
@@ -102,12 +102,12 @@
                                     <div class="row">
                                         <div class="comment-profile col-3 mx-4">
                                             <a href="#">
-                                                <img src="<?php echo BASE_URI;?>/images/<?php echo $userInfo->picture;?>"
+                                                <img src="<?php echo BASE_URI;?>/images/<?php echo $nextUserInfo->picture;?>"
                                                     class="circle-avatar" style="height: 50px; width: 50px;">
                                             </a>
                                             <a href="#" class="user-name font-italic h6"
                                                 style="color: var(--primary-color);">
-                                                <?php echo ("{$userInfo->firstName} "); echo $userInfo->lastName;?></a>
+                                                <?php echo ("{$nextUserInfo->firstName} "); echo $nextUserInfo->lastName;?></a>
                                         </div>
                                         <div class="comment-text col-8">
                                             <p><?php echo $postComment->body;?></p>
@@ -122,16 +122,21 @@
                                     <div class="comment-reply">
                                         <?php if(isLoggedIn()):?>
                                             <p class="h5">Add your comment</p>
-                                        <form role="form" method="post" action="post.php?id=<?php echo $post->id; ?>">
+                                            <div id="comment-alert-area">
+
+                                            </div>
+                                        <!-- <form id="post-comment-form" role="form" method="post" action="post.php?id=<?//php echo $post->id; ?>"> -->
+                                        <form id="post-comment-form">
                                             <div class="form-group">
-                                                <textarea id="reply" rows="10" cols="80" class="form-control"
+                                                <input id="commentPostId" type="text" value="<?php echo $post->id;?>" hidden>
+                                                <textarea id="replyBody" rows="10" cols="80" class="form-control"
                                                     name="comment-body"></textarea>
                                                 <script>
-                                                CKEDITOR.replace('reply');
+                                                CKEDITOR.replace('replyBody');
                                                 </script>
                                             </div>
                                             <div class="reply-button text-end">
-                                                <button name="doReply" type="submit" class="btn w-25"
+                                                <button id="comment-reply-button" name="doReply" type="submit" class="btn w-25"
                                                     style="background-color: var(--primary-color);">Submit</button>
                                             </div>
                                         </form>
@@ -165,7 +170,7 @@
 
 
     <!-- Chat system Strats Here -->
-    <?php include('includes/chat-system.php');?>
+    <?//php include('includes/chat-system.php');?>
     <!-- Chat system Ends Here -->
 
 </main>

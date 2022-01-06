@@ -6,12 +6,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>ShareLearning</title>
+    <title>Sabaeko Books</title>
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="<?php echo BASE_URI; ?>templates/css/boot/bootstrap.min.css">
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    
     <!-- Custom Css -->
     <link rel="stylesheet" href="<?php echo BASE_URI; ?>templates/css/style.css">
 
@@ -27,7 +26,7 @@
 
     <!-- Top bar starts here  -->
 
-    <section id="top-bar" class="bg-primary">
+    <section id="top-bar">
         <div class="container">
             <div class="row">
                 <div class="top-bar-content d-flex justify-content-between justify-content-lg-around px-5 px-lg-0">
@@ -47,12 +46,11 @@
 
     <!-- Header starts here -->
 
-
     <header id="header" class="sticky-top">
         <nav class="navbar navbar-expand-lg navbar-dark">
             <div class="container d-flex justify-content-between">
                 <div class=" d-flex align-items-center">
-                    <a class="navbar-brand" href="#">ShareLearning</a>
+                    <a class="navbar-brand" href="<?php echo BASE_URI; ?>">Sabaeko Books</a>
                     <form class="form-inline d-none d-md-flex" role="form">
                         <div class="input-group">
                             <input type="text" class="form-control shadow-none" placeholder="Search" aria-label="SearchHere" aria-describedby="basic-addon2">
@@ -63,14 +61,16 @@
                             </div>
                         </div>
                     </form>
-
                 </div>
-
-                <?php if (isLoggedIn()) : ?>
-                    <div class="user-profile d-flex d-md-none">
+                <? //php if (isLoggedIn()) : 
+                ?>
+                <!-- <div class="user-profile d-flex d-md-none">
                         <div class="nav-item dropdown d-flex align-items-center">
-                            <img class="nav-link circle-avatar-icon p-1" src="https://cdn.pixabay.com/photo/2017/12/31/15/56/portrait-3052641_960_720.jpg" alt="">
-                            <a class="nav-link active dropdown-toggle d-flex align-items-center text-light p-0" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Rahul
+                            <img class="nav-link circle-avatar-icon p-1" src="<? //php echo BASE_URI 
+                                                                                ?>images/<? //php echo currentUserInfo($_SESSION['user_id'])->picture; 
+                                                                                                                ?>" alt="">
+                            <a class="nav-link active dropdown-toggle d-flex align-items-center text-light p-0" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><? //php echo currentUserInfo($_SESSION['user_id'])->firstName; 
+                                                                                                                                                                                                            ?>
                             </a>
                             <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                                 <li><a class="dropdown-item" href="#">CSIT</a></li>
@@ -82,9 +82,10 @@
                             </ul>
                         </div>
 
-                    </div>
+                    </div> -->
 
-                <?php endif; ?>
+                <? //php endif; 
+                ?>
 
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -132,15 +133,15 @@
                                 </li>
                             </div>
                         <?php else : ?>
-                            <div class="logout-form d-block d-md-none">
+                            <div class="logout-form d-lg-block d-md-none">
                                 <form action="logout.php" method="post">
                                     <button type="submit" name="doLogout" class="btn btn-primary w-100 h6">LogOut</button>
                                 </form>
                             </div>
-                            <div class="user-profile d-none d-md-flex">
+                            <div class="user-profile d-lg-flex d-md-none">
                                 <div class="nav-item dropdown d-flex align-items-center">
-                                    <img class="nav-link circle-avatar-icon p-1" src="https://cdn.pixabay.com/photo/2017/12/31/15/56/portrait-3052641_960_720.jpg" alt="">
-                                    <a class="nav-link active dropdown-toggle d-flex align-items-center p-0" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">Rahul
+                                    <img class="nav-link circle-avatar-icon p-1" src="<?php echo BASE_URI ?>images/<?php echo currentUserInfo($_SESSION['user_id'])->picture; ?>" alt="">
+                                    <a class="nav-link active dropdown-toggle d-flex align-items-center text-light p-0" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false"><?php echo currentUserInfo($_SESSION['user_id'])->firstName; ?>
                                     </a>
                                     <ul class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                                         <li><a class="dropdown-item" href="#">CSIT</a></li>
@@ -151,6 +152,7 @@
                                         <li><a class="dropdown-item" href="#">BIT</a></li>
                                     </ul>
                                 </div>
+
                             </div>
                         <?php endif; ?>
                 </div>

@@ -42,7 +42,7 @@
                             <input id="unfollowedId" type="text" value="<?php echo $nextUserInfo->id; ?>" hidden>
                             <i class="unfollow-user-icon fa fa-user-times" aria-hidden="true"></i>
                             <a>
-                                <p id="unfollow-user-btn" class="unfollow-user-btn">Unfollow <?php echo $nextUserInfo->firstName; ?></p>
+                                <p id="unfollow-user-btn" class="unfollow-user-btn" onclick="removeFollower(<?php echo $_SESSION['user_id']?>, <?php echo $nextUserInfo->id?>, this)">Unfollow <?php echo $nextUserInfo->firstName; ?></p>
                             </a>
                         </div>
                         <div id="openChatSystem" class="follow-user d-flex flex-column align-items-center sidebar-item-red text-center" onclick="showChatSystem()">
@@ -55,7 +55,7 @@
                             <input id="followedId" type="text" value="<?php echo $nextUserInfo->id; ?>" hidden>
                             <i class="follow-user-icon fa fa-user-plus" aria-hidden="true"></i>
                             <a>
-                                <p id="follow-user-btn" class="follow-user-btn">Follow <?php echo $nextUserInfo->firstName; ?></p>
+                                <p id="follow-user-btn" class="follow-user-btn" onclick="addFollower(<?php echo $_SESSION['user_id']?>, <?php echo $nextUserInfo->id?>, this)">Follow <?php echo $nextUserInfo->firstName; ?></p>
                             </a>
                         </div>
                         <div id="openChatSystem" class="follow-user d-flex flex-column align-items-center sidebar-item-red text-center" onclick="showChatSystem()">

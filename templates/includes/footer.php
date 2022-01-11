@@ -186,8 +186,9 @@
 
 <script src="<?php echo BASE_URI;?>templates/js/script.js"></script>
 <script src="<?php echo BASE_URI;?>templates/js/chat.js"></script>
-<script src="<?php echo BASE_URI;?>templates/js/post.js"></script>
 <script src="<?php echo BASE_URI;?>templates/js/user.js"></script>
+<script src="<?php echo BASE_URI;?>templates/js/post.js"></script>
+<!-- <script src="<?php echo BASE_URI;?>templates/js/user.js"></script> -->
 <script src="<?php echo BASE_URI;?>templates/js/boot/bootstrap.min.js"></script>
 
 <!-- LightSlider Js -->

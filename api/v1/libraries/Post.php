@@ -15,6 +15,8 @@ class Post
     private $description;
     private $boughtDate;
     private $price;
+    private $bookCount;
+    private $wishlistd;
     private $postType;
     private $postRating;
     private $postedOn;
@@ -68,6 +70,16 @@ class Post
     public function getPrice()
     {
         return $this->price;
+    }
+
+    public function getBookCount()
+    {
+        return $this->bookCount;
+    }
+
+    public function getWishlisted()
+    {
+        return $this->wishlistd;
     }
 
     public function getPostType()
@@ -180,6 +192,33 @@ class Post
             $this->postType = $postType;
     }
 
+    public function setBookCount($bookCount)
+    {
+        if (is_null($bookCount))
+            $this->bookCount = null;
+        if (empty($bookCount))
+            // throw new PostException('Books Count can\'t be empty');
+            $this->bookCount = null;
+        elseif (!is_numeric($bookCount))
+            throw new PostException('Books count must be numeric value');
+        else
+            $this->bookCount = $bookCount;
+    }
+
+    public function setBookWishlist($wishlistd)
+    {
+        if (is_null($wishlistd))
+            $this->wishlistd = null;
+        if (empty($wishlistd))
+            // throw new PostException('Book wishlist can\'t be empty');
+            $this->wishlistd = null;
+        elseif (!is_numeric($wishlistd))
+            throw new PostException('Book wishlist must be numeric value');
+        else
+            $this->wishlistd = $wishlistd;
+    }
+
+
     public function setPostRating($rating)
     {
         if (is_null($rating))
@@ -213,6 +252,8 @@ class Post
         $this->setDescription($row->description);
         $this->setBoughtDate($row->boughtDate);
         $this->setPrice($row->price);
+        $this->setBookCount($row->bookCount);
+        $this->setBookWishlist($row->wishlisted);
         $this->setPostType($row->postType);
         $this->setPostRating($row->postRating);
         $this->setPostedOn($row->postedOn);
@@ -226,6 +267,8 @@ class Post
         isset($data['description']) ? $this->setDescription($data['description']) : false;
         isset($data['boughtDate']) ? $this->setBoughtDate($data['boughtDate']) : false;
         isset($data['price']) ? $this->setPrice($data['price']) : false;
+        isset($data['wishlisted']) ? $this->setBookWishlist($data['wishlisted']) : false;
+        isset($data['bookCount']) ? $this->setBookCount($data['bookCount']) : false;
         isset($data['postType']) ? $this->setPostType($data['postType']) : false;
         isset($data['postRating']) ? $this->setPostRating($data['postRating']) : $this->setPostRating(null);
         isset($data['postedOn']) ? $this->setPostedOn($data['postedOn']) : false;
@@ -242,6 +285,8 @@ class Post
         $post['description'] = $this->description;
         $post['boughtDate'] = $this->boughtDate;
         $post['price'] = $this->price;
+        $post['bookCount'] = $this->bookCount;
+        $post['wishlisted'] = $this->wishlistd;
         $post['postType'] = $this->postType;
         $post['postRating'] = $this->postRating;
         $post['postedOn'] = $this->postedOn;
@@ -456,7 +501,7 @@ class Post
                 exit;
             }
 
-            $this->db->query('INSERT INTO post (id, userId, bookName, author, description, boughtDate, price, postType, postRating, postedOn) VALUES (null, :userId, :bookName, :author, :description, :boughtDate, :price, :postType, :postRating, null)');
+            $this->db->query('INSERT INTO post (id, userId, bookName, author, description, boughtDate, price, bookCount, wishlisted, postType, postRating, postedOn) VALUES (null, :userId, :bookName, :author, :description, :boughtDate, :price, :bookCount, :wishlisted, :postType, :postRating, null)');
 
             $this->db->bind(':userId', $this->userId);
             $this->db->bind(':bookName', $this->bookName);
@@ -464,6 +509,8 @@ class Post
             $this->db->bind(':description', $this->description);
             $this->db->bind(':boughtDate', $this->boughtDate);
             $this->db->bind(':price', $this->price);
+            $this->db->bind(':bookCount', $this->bookCount);
+            $this->db->bind(':wishlisted', $this->wishlistd);
             $this->db->bind(':postType', $this->postType);
             $this->db->bind(':postRating', $this->postRating);
 
@@ -561,6 +608,8 @@ class Post
             $descriptionUpdated = false;
             $boughtDateUpdated = false;
             $priceUpdated = false;
+            $bookCountUpdated = false;
+            $wishlistdUpdated = false;
             $postTypeUpdated = false;
             $postRatingUpdated = false;
 
@@ -619,6 +668,22 @@ class Post
                 }
             }
 
+            if (array_key_exists('bookCount', $data)) {
+                if ((strcmp($data['bookCount'], $this->bookCount)) != 0) {
+                    $bookCountUpdated = true;
+                    $this->setBookCount($data['bookCount']);
+                    $queryFields .= "bookCount = :bookCount, ";
+                }
+            }
+
+            if (array_key_exists('wishlisted', $data)) {
+                if ((strcmp($data['wishlisted'], $this->wishlistd)) != 0) {
+                    $wishlistedUpd = true;
+                    $this->setBookWishlist($data['wishlisted']);
+                    $queryFields .= "wishlisted = :wishlisted, ";
+                }
+            }
+
             if (array_key_exists('postType', $data)) {
                 if ((strcmp($data['postType'], $this->postType)) != 0) {
                     $postTypeUpdated = true;
@@ -669,7 +734,12 @@ class Post
 
             if ($priceUpdated)
                 $this->db->bind(':price', $this->price);
+            
+            if ($bookCountUpdated)
+                $this->db->bind(':bookCount', $this->bookCount);
 
+            if ($wishlistdUpdated)
+                $this->db->bind(':wishlisted', $this->wishlistd);
 
             if ($postTypeUpdated)
                 $this->db->bind(':postType', $this->postType);

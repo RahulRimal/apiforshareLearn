@@ -14,7 +14,7 @@ if (!isset($_SERVER['HTTP_AUTHORIZATION']) || strlen($_SERVER['HTTP_AUTHORIZATIO
     $response->setHttpStatusCode(401);
     $response->setSuccess(false);
     (!isset($_SERVER['HTTP_AUTHORIZATION']) ? $response->addMessage("Access token missing from the header") : false);
-    isset($_SERVER['HTTP_AUTHORIZATION']) ?((strlen($_SERVER['HTTP_AUTHORIZATION']) < 1 ? $response->addMessage("Access token cannot be blank") : false)): false;
+    isset($_SERVER['HTTP_AUTHORIZATION']) ? ((strlen($_SERVER['HTTP_AUTHORIZATION']) < 1 ? $response->addMessage("Access token cannot be blank") : false)) : false;
     $response->send();
     exit;
 }
@@ -59,7 +59,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $response = $post->getPostById($postId);
         $response->send();
         exit;
-
     } else {
         $response = new Response();
         $response->setHttpStatusCode(400);
@@ -70,15 +69,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     }
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_SERVER['CONTENT_TYPE'])) {
-    if ($_SERVER['CONTENT_TYPE'] != 'application/json') {
-        $response = new Response();
-        $response->setHttpStatusCode(400);
-        $response->setSuccess(false);
-        $response->addMessage("Header type not set to JSON");
-        $response->send();
-        exit;
+        if ($_SERVER['CONTENT_TYPE'] != 'application/json') {
+            $response = new Response();
+            $response->setHttpStatusCode(400);
+            $response->setSuccess(false);
+            $response->addMessage("Header type not set to JSON");
+            $response->send();
+            exit;
+        }
     }
-}
     if (!isset($_SERVER['CONTENT_TYPE'])) {
         $response = new Response();
         $response->setHttpStatusCode(400);
@@ -121,25 +120,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
     $data = array();
 
-    if(isset($jsonData->bookName))
+    if (isset($jsonData->bookName))
         $data['bookName'] = $jsonData->bookName;
 
-        if(isset($jsonData->author))
+    if (isset($jsonData->author))
         $data['author'] = $jsonData->author;
 
-        if(isset($jsonData->description))
+    if (isset($jsonData->description))
         $data['description'] = $jsonData->description;
 
-        if(isset($jsonData->boughtDate))
+    if (isset($jsonData->boughtDate))
         $data['boughtDate'] = $jsonData->boughtDate;
 
-        if(isset($jsonData->price))
+    if (isset($jsonData->price))
         $data['price'] = $jsonData->price;
 
-        if(isset($jsonData->postType))
+    if (isset($jsonData->postType))
         $data['postType'] = $jsonData->postType;
 
-        if(isset($jsonData->postRating))
+    if (isset($jsonData->postRating))
         $data['postRating'] = $jsonData->postRating;
 
 
@@ -147,9 +146,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $response = $post->createPost($uId, $data);
     $response->send();
     exit();
-
 } elseif ($_SERVER['REQUEST_METHOD'] == 'PATCH') {
-    if ($_SERVER['CONTENT_TYPE'] != 'application/json') {
+    if (isset($_SERVER['CONTENT_TYPE'])) {
+        if ($_SERVER['CONTENT_TYPE'] != 'application/json') {
+            $response = new Response();
+            $response->setHttpStatusCode(400);
+            $response->setSuccess(false);
+            $response->addMessage("Header type not set to JSON");
+            $response->send();
+            exit;
+        }
+    }
+    if (!isset($_SERVER['CONTENT_TYPE'])) {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
@@ -225,7 +233,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
         $post = new Post();
         $response = $post->deletePost($id, $uId);
-        return $response;
+
+        $response->send();
+        exit;
     } else {
         $response = new Response();
         $response->setHttpStatusCode(400);

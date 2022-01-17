@@ -297,8 +297,10 @@ class Post
     private function getPost($id)
     {
         try {
+            $this->setId($id);
+            
             $this->db->query('SELECT * FROM post where id = :postId');
-            $this->db->bind(':postId', $id);
+            $this->db->bind(':postId', $this->id);
 
             $row = $this->db->single();
 

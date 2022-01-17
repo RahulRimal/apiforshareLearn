@@ -38,7 +38,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $uId = $_GET['user'];
 
         $post = new Post();
-        $post->getUserPost($uId);
+        $response = $post->getUserPost($uId);
+        $response->send();
+        exit;
     }
     //  else {
     //     $response = new Response();
@@ -54,7 +56,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $postId = $_GET['post'];
 
         $post = new Post();
-        $post->getPostById($postId);
+        $response = $post->getPostById($postId);
+        $response->send();
+        exit;
+
     } else {
         $response = new Response();
         $response->setHttpStatusCode(400);
@@ -64,7 +69,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         exit;
     }
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    if (isset($_SERVER['CONTENT_TYPE'])) {
     if ($_SERVER['CONTENT_TYPE'] != 'application/json') {
+        $response = new Response();
+        $response->setHttpStatusCode(400);
+        $response->setSuccess(false);
+        $response->addMessage("Header type not set to JSON");
+        $response->send();
+        exit;
+    }
+}
+    if (!isset($_SERVER['CONTENT_TYPE'])) {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
@@ -129,7 +144,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
 
     $post = new Post();
-    $post->createPost($uId, $data);
+    $response = $post->createPost($uId, $data);
+    $response->send();
+    exit();
+
 } elseif ($_SERVER['REQUEST_METHOD'] == 'PATCH') {
     if ($_SERVER['CONTENT_TYPE'] != 'application/json') {
         $response = new Response();
@@ -174,7 +192,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             isset($jsonData->postRating) ? $data['postRating'] = $jsonData->postRating : false;
 
             $post = new Post();
-            $post->updatePost($id, $data);
+            $response = $post->updatePost($id, $data);
+            $response->send();
+            exit;
         } else {
             $response = new Response();
             $response->setHttpStatusCode(400);
@@ -204,7 +224,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $id = $_GET['post'];
 
         $post = new Post();
-        $post->deletePost($id, $uId);
+        $response = $post->deletePost($id, $uId);
+        return $response;
     } else {
         $response = new Response();
         $response->setHttpStatusCode(400);

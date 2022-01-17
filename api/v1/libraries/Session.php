@@ -282,8 +282,9 @@ class Session
                 $response->setSuccess(true);
                 $response->addMessage("Session Created Successfully");
                 $response->setData($returnData);
-                $response->send();
-                exit;
+                return $response;
+                // $response->send();
+                // exit;
             } else {
                 $response = new Response();
                 $response->setHttpStatusCode(500);
@@ -396,8 +397,9 @@ class Session
                     $response->setHttpStatusCode(200);
                     $response->setSuccess(true);
                     $response->addMessage("Session Deleted Successfully");
-                    $response->send();
-                    exit;
+                    return $response;
+                    // $response->send();
+                    // exit;
                 } else {
                     $response = new Response();
                     $response->setHttpStatusCode(500);
@@ -473,8 +475,9 @@ class Session
                     $response->setSuccess(true);
                     $response->addMessage("User session updated successfully");
                     $response->setData($returnData);
-                    $response->send();
-                    exit;
+                    return $response;
+                    // $response->send();
+                    // exit;
                 } else {
                     $response = new Response();
                     $response->setHttpStatusCode(500);
@@ -542,7 +545,7 @@ class Session
 
             if ($this->db->rowCount() > 0) {
                 $user->setUserFromRow($row);
-                $this->createSession($user);
+                return $this->createSession($user);
             } else {
                 $response = new Response();
                 $response->setHttpStatusCode(500);

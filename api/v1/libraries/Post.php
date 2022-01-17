@@ -352,8 +352,9 @@ class Post
                 $response->setSuccess(true);
                 $response->addMessage('Posts retrievd successfully');
                 $response->setData($returnData);
-                $response->send();
-                exit;
+                return $response;
+                // $response->send();
+                // exit;
             } else {
                 $response = new Response();
                 $response->setHttpStatusCode(500);
@@ -407,8 +408,9 @@ class Post
                 $response->setSuccess(true);
                 $response->addMessage('Posts retrievd successfully');
                 $response->setData($returnData);
-                $response->send();
-                exit;
+                return $response;
+                // $response->send();
+                // exit;
             } else {
                 $response = new Response();
                 $response->setHttpStatusCode(500);
@@ -556,8 +558,9 @@ class Post
                 $response->setSuccess(true);
                 $response->addMessage("Post Created Successfully");
                 $response->setData($returnData);
-                $response->send();
-                exit;
+                return $response;
+                // $response->send();
+                // exit;
             } else {
                 $response = new Response();
                 $response->setHttpStatusCode(500);
@@ -769,8 +772,9 @@ class Post
                 $response->setSuccess(true);
                 $response->addMessage("Post Information Updated successfully");
                 $response->setData($returnData);
-                $response->send();
-                exit;
+                return $response;
+                // $response->send();
+                // exit;
             } else {
                 $response = new Response();
                 $response->setHttpStatusCode(500);
@@ -823,8 +827,9 @@ class Post
                 $response->setHttpStatusCode(200);
                 $response->setSuccess(true);
                 $response->addMessage("Post Deleted Successfully");
-                $response->send();
-                exit;
+                return $response;
+                // $response->send();
+                // exit;
             } else {
                 $response = new Response();
                 $response->setHttpStatusCode(500);

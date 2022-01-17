@@ -11,13 +11,14 @@ require_once('../libraries/Response.php');
 // Getting Existing User
 // /users/1
 
-
-
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     if (isset($_GET['user'])) {
         $uId = $_GET['user'];
         $user = new User('tempUser', 'tempPass', null, 'tempFirst', 'tempLast', null, null, null);
-        $user->getDetails($uId);
+        $response = $user->getDetails($uId);
+
+        $response->send();
+        exit;
     } else {
         $response = new Response();
         $response->setHttpStatusCode(400);
@@ -27,7 +28,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         exit;
     }
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if ($_SERVER['CONTENT_TYPE'] != 'application/json') {
+    if (isset($_SERVER['CONTENT_TYPE'])) {
+        if ($_SERVER['CONTENT_TYPE'] != 'application/json') {
+            $response = new Response();
+            $response->setHttpStatusCode(400);
+            $response->setSuccess(false);
+            $response->addMessage("Header type not set to JSON");
+            $response->send();
+            exit;
+        }
+    }
+
+    if (!isset($_SERVER['CONTENT_TYPE'])) {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
@@ -35,6 +47,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $response->send();
         exit;
     }
+
 
     $rawData = file_get_contents('php://input');
 
@@ -62,7 +75,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     try {
         $newUser = new User($jsonData->username, $jsonData->password, isset($jsonData->email) ? $jsonData->email : null, $jsonData->firstName, $jsonData->lastName, isset($jsonData->class) ? $jsonData->class : null, isset($jsonData->description) ? $jsonData->description : null, isset($jsonData->followers) ? $jsonData->followers : null);
 
-        $newUser->createNewUser();
+        $response = $newUser->createNewUser();
+        $response->send();
+        exit;
     } catch (UserException $ex) {
         $response = new Response();
         $response->setHttpStatusCode(400);
@@ -73,7 +88,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     }
 } elseif ($_SERVER['REQUEST_METHOD'] == 'PATCH') {
 
-    if ($_SERVER['CONTENT_TYPE'] != 'application/json') {
+    if (isset($_SERVER['CONTENT_TYPE'])) {
+        if ($_SERVER['CONTENT_TYPE'] != 'application/json') {
+            $response = new Response();
+            $response->setHttpStatusCode(400);
+            $response->setSuccess(false);
+            $response->addMessage("Header type not set to JSON");
+            $response->send();
+            exit;
+        }
+    }
+
+    if (!isset($_SERVER['CONTENT_TYPE'])) {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
@@ -98,8 +124,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
         $user = new User('tempUser', 'tempPass', null, 'tempFirst', 'tempLast', null, null, null);
 
-        if(isset($jsonData->password) || isset($jsonData->email) || isset($jsonData->firstName) || isset($jsonData->lastName) || isset($jsonData->class) || isset($jsonData->description))
-        {
+        if (!isset($jsonData->password) && !isset($jsonData->email) && !isset($jsonData->firstName) && !isset($jsonData->lastName) && !isset($jsonData->class) && !isset($jsonData->description)) {
+            $response = new Response();
+            $response->setHttpStatusCode(400);
+            $response->setSuccess(false);
+            $response->addMessage("No information to update");
+            $response->send();
+            exit;
+        }
+
+        if (isset($jsonData->password) || isset($jsonData->email) || isset($jsonData->firstName) || isset($jsonData->lastName) || isset($jsonData->class) || isset($jsonData->description)) {
             $receivedData = array();
 
             isset($jsonData->password) ? $receivedData['password'] = $jsonData->password : false;
@@ -108,21 +142,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             isset($jsonData->lastName) ? $receivedData['lastName'] = $jsonData->lastName : false;
             isset($jsonData->class) ? $receivedData['class'] = $jsonData->class : false;
             isset($jsonData->description) ? $receivedData['description'] = $jsonData->description : false;
-            $user->updateInfo($uId, $receivedData);
-        }
-        else
-        {
+            $response = $user->updateInfo($uId, $receivedData);
+            $response->send();
+            exit;
+        } else {
             $response = new Response();
-        $response->setHttpStatusCode(400);
-        $response->setSuccess(false);
-        isset($jsonData->username) ? $response->addMessage('Username can\'t be updated') : false;
-        isset($jsonData->id) ? $response->addMessage('User ID can\'t be updated') : false;
-        isset($jsonData->followers) ? $response->addMessage('Followers can\'t be updated manually') : false;
-        isset($jsonData->userCreatedDate) ? $response->addMessage('User Signed up date can\'t be updated') : false;
-        $response->send();
-        exit;
+            $response->setHttpStatusCode(400);
+            $response->setSuccess(false);
+            isset($jsonData->username) ? $response->addMessage('Username can\'t be updated') : false;
+            isset($jsonData->id) ? $response->addMessage('User ID can\'t be updated') : false;
+            isset($jsonData->followers) ? $response->addMessage('Followers can\'t be updated manually') : false;
+            isset($jsonData->userCreatedDate) ? $response->addMessage('User Signed up date can\'t be updated') : false;
+            $response->send();
+            exit;
         }
-
     } else {
         $response = new Response();
         $response->setHttpStatusCode(400);
@@ -136,7 +169,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $uId = $_GET['user'];
 
         $user = new User('tempUser', 'tempPass', null, 'tempFirst', 'tempLast', null, null, null);
-        $user->deleteUser($uId);
+        $response = $user->deleteUser($uId);
+        $response->send();
+        exit;
     } else {
         $response = new Response();
         $response->setHttpStatusCode(400);

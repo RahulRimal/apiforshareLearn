@@ -58,8 +58,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $session = new Session();
 
-    $session->loginUser($email, $username, $password);
-
+    $response = $session->loginUser($email, $username, $password);
+    $response->send();
+    exit;
 
 }
 elseif($_SERVER['REQUEST_METHOD'] == 'PATCH')
@@ -104,7 +105,9 @@ elseif($_SERVER['REQUEST_METHOD'] == 'PATCH')
       }
 
     $session = new Session();
-    $session->updateSession($jsonData->refreshToken);
+    $response =  $session->updateSession($jsonData->refreshToken);
+    $response->send();
+    exit;
 
 
 }
@@ -123,7 +126,10 @@ elseif($_SERVER['REQUEST_METHOD'] == 'DELETE')
     $sessId = $_GET['session'];
 
     $session = new Session();
-    $session->deleteSession($sessId);
+    
+    $response =  $session->deleteSession($sessId);
+    $response->send();
+    exit;
 
 }
 else

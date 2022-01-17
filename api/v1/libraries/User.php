@@ -329,7 +329,8 @@ class User
         $response->toCache(true);
         $response->addMessage("User Information Received successfully");
         $response->setData($returnData);
-        $response->send();
+        // $response->send();
+        return $response;
         exit;
     }
 
@@ -419,7 +420,8 @@ class User
                     $response->setSuccess(true);
                     $response->addMessage("User Created Successfully");
                     $response->setData($returnData);
-                    $response->send();
+                    // $response->send();
+                    return $response;
                     exit;
                 } else {
                     $response = new Response();
@@ -544,7 +546,8 @@ class User
                     $response->setHttpStatusCode(400);
                     $response->setSuccess(false);
                     $response->addMessage("No new information to update");
-                    $response->send();
+                    // $response->send();
+                    return $response;
                     exit;
                 }
 
@@ -592,7 +595,8 @@ class User
                     $response->setSuccess(true);
                     $response->addMessage("User Information Updated successfully");
                     $response->setData($returnData);
-                    $response->send();
+                    // $response->send();
+                    return $response;
                     exit;
                 } else {
                     $response = new Response();
@@ -644,8 +648,8 @@ class User
                     $response->setHttpStatusCode(200);
                     $response->setSuccess(true);
                     $response->addMessage("User Deleted Successfully");
-                    $response->send();
-                    exit;
+                    // $response->send();
+                    return $response;
                 } else {
                     $response = new Response();
                     $response->setHttpStatusCode(500);

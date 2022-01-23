@@ -14,23 +14,23 @@ class Chat
     public function getAllMessages($sender, $receiver)
     {
 
-        // $this->db->query("SELECT * FROM chat WHERE outgoing_id = :sender AND incoming_id = :receiver OR outgoing_id = :receiver AND incoming_id = :sender ORDER BY id ASC");
+        // $this->db->query("SELECT * FROM chat WHERE outgoingId = :sender AND incomingId = :receiver OR outgoingId = :receiver AND incomingId = :sender ORDER BY id ASC");
         // $this->db->query("SELECT * FROM chat
-        // INNER JOIN user.picture ON chat.outgoing_id = user.id
-        // WHERE (outgoing_id = :sender AND incomingid = :receiver)
-        // OR (outgoing_id = :receiver AND incoming_id = :sender)
+        // INNER JOIN user.picture ON chat.outgoingId = user.id
+        // WHERE (outgoingId = :sender AND incomingid = :receiver)
+        // OR (outgoingId = :receiver AND incomingId = :sender)
         // ORDER BY chat.id");
 
         // $this->db->query("SELECT chat.*, user.picture FROM chat
-        // INNER JOIN user ON chat.outgoing_id = user.id
-        // WHERE (outgoing_id = :sender AND incomingid = :receiver)
-        // OR (outgoing_id = :receiver AND incoming_id = :sender)
+        // INNER JOIN user ON chat.outgoingId = user.id
+        // WHERE (outgoingId = :sender AND incomingid = :receiver)
+        // OR (outgoingId = :receiver AND incomingId = :sender)
         // ORDER BY chat.id");
 
         $this->db->query("SELECT chat.*, user.* FROM chat
-        INNER JOIN user ON chat.outgoing_id = user.id
-        WHERE (outgoing_id = :sender AND incoming_id = :receiver)
-        OR (outgoing_id = :receiver AND incoming_id = :sender)
+        INNER JOIN user ON chat.outgoingId = user.id
+        WHERE (outgoingId = :sender AND incomingId = :receiver)
+        OR (outgoingId = :receiver AND incomingId = :sender)
         ORDER BY chat.id");
 
         $this->db->bind(':sender', $sender);
@@ -43,11 +43,11 @@ class Chat
     public function getMessage($sender, $receiver)
     {
     
-            // $this->db->query("SELECT * FROM chat WHERE outgoing_id = :sender AND incoming_id = :receiver OR outgoing_id = :receiver AND incoming_id = :sender ORDER BY id DESC");
+            // $this->db->query("SELECT * FROM chat WHERE outgoingId = :sender AND incomingId = :receiver OR outgoingId = :receiver AND incomingId = :sender ORDER BY id DESC");
             $this->db->query("SELECT chat.*, user.* FROM chat
-        INNER JOIN user ON chat.outgoing_id = user.id
-        WHERE (outgoing_id = :sender AND incoming_id = :receiver)
-        OR (outgoing_id = :receiver AND incoming_id = :sender)
+        INNER JOIN user ON chat.outgoingId = user.id
+        WHERE (outgoingId = :sender AND incomingId = :receiver)
+        OR (outgoingId = :receiver AND incomingId = :sender)
         ORDER BY chat.id LIMIT 1");
             $this->db->bind(':sender', $sender);
             $this->db->bind(':receiver', $receiver);
@@ -60,7 +60,7 @@ class Chat
 
     public function sendMessage($sender, $receiver, $message)
     {
-        $this->db->query("INSERT INTO chat (outgoing_id, incoming_id, message) VALUES (:sender, :receiver, :message)");
+        $this->db->query("INSERT INTO chat (outgoingId, incomingId, message) VALUES (:sender, :receiver, :message)");
         $this->db->bind(':sender', $sender);
         $this->db->bind(':receiver', $receiver);
         $this->db->bind(':message', $message);
@@ -87,5 +87,3 @@ class Chat
 
 
 }
-
-?>

@@ -3,6 +3,7 @@
 require('../../../core/init.php');
 require_once('../libraries/Session.php');
 require_once('../libraries/Response.php');
+require_once('../helpers/session_helper.php');
 
 ?>
 
@@ -10,16 +11,38 @@ require_once('../libraries/Response.php');
 
 <?php
 
+if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+
+    $accessToken = getBearerToken();
+
+    $sess = new Session();
+
+    $sess = $sess->getSessionInfo($accessToken);
+
+    $returnData = array();
+    $returnData['rows_returned'] = 1;
+    $returnData['session'] = $sess->returnSessionAsArray();
+
+    $response = new Response();
+    $response->setHttpStatusCode(200);
+    $response->setSuccess(true);
+    $response->addMessage('Session retrievd successfully');
+    $response->setData($returnData);
+    $response->send();
+
+    exit;
+}
+
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     sleep(1);
 
-        if (isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE'] != 'application/json') {
-            $response = new Response();
-            $response->setHttpStatusCode(400);
-            $response->setSuccess(false);
-            $response->addMessage("Header type not set to JSON");
-            $response->send();
-            exit;
+    if (isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE'] != 'application/json') {
+        $response = new Response();
+        $response->setHttpStatusCode(400);
+        $response->setSuccess(false);
+        $response->addMessage("Header type not set to JSON");
+        $response->send();
+        exit;
     }
 
     $rawData = file_get_contents('php://input');
@@ -61,12 +84,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $response = $session->loginUser($email, $username, $password);
     $response->send();
     exit;
-
-}
-elseif($_SERVER['REQUEST_METHOD'] == 'PATCH')
-{
-    if(!isset($_GET['session']))
-    {
+} elseif ($_SERVER['REQUEST_METHOD'] == 'PATCH') {
+    if (!isset($_GET['session'])) {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
@@ -94,7 +113,7 @@ elseif($_SERVER['REQUEST_METHOD'] == 'PATCH')
         exit;
     }
 
-    if(!isset($jsonData->refreshToken) || strlen($jsonData->refreshToken) < 1)  {
+    if (!isset($jsonData->refreshToken) || strlen($jsonData->refreshToken) < 1) {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
@@ -102,38 +121,30 @@ elseif($_SERVER['REQUEST_METHOD'] == 'PATCH')
         (strlen($jsonData->refresh_token) < 1 ? $response->addMessage("Refresh Token cannot be blank") : false);
         $response->send();
         exit;
-      }
+    }
 
     $session = new Session();
     $response =  $session->updateSession($jsonData->refreshToken);
     $response->send();
     exit;
-
-
-}
-elseif($_SERVER['REQUEST_METHOD'] == 'DELETE')
-{
-    if(!isset($_GET['session']))
-    {
+} elseif ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
+    if (!isset($_GET['session'])) {
         $response = new Response();
-    $response->setHttpStatusCode(400);
-    $response->setSuccess(false);
-    $response->addMessage("Session ID required to delete a session");
-    $response->send();
-    exit;
+        $response->setHttpStatusCode(400);
+        $response->setSuccess(false);
+        $response->addMessage("Session ID required to delete a session");
+        $response->send();
+        exit;
     }
 
     $sessId = $_GET['session'];
 
     $session = new Session();
-    
+
     $response =  $session->deleteSession($sessId);
     $response->send();
     exit;
-
-}
-else
-{
+} else {
     $response = new Response();
     $response->setHttpStatusCode(405);
     $response->setSuccess(false);

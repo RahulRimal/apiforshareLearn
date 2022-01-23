@@ -240,64 +240,89 @@ class Session
 
     public function createSession($user)
     {
-        $this->setAccessToken(base64_encode(bin2hex(openssl_random_pseudo_bytes(24) . time())));
-        $this->setAccessTokenExpiry($this->getDateFromSeconds(1200));
-        $this->setRefreshToken(base64_encode(bin2hex(openssl_random_pseudo_bytes(24) . time())));
-        $this->setRefreshTokenExpiry($this->getDateFromSeconds(1209600));
 
-        $this->db->query('INSERT INTO sessions (id, userid, accesstoken, accesstokenexpiry, refreshtoken, refreshtokenexpiry) VALUES (null, :userId, :accessToken, DATE_ADD(NOW(), INTERVAL :accessTokenExpiry SECOND), :refreshToken, DATE_ADD(NOW(), INTERVAL :refreshTokenExpiry SECOND))');
+        try {
+            $this->setAccessToken(base64_encode(bin2hex(openssl_random_pseudo_bytes(24) . time())));
+            $this->setAccessTokenExpiry($this->getDateFromSeconds(1200));
+            $this->setRefreshToken(base64_encode(bin2hex(openssl_random_pseudo_bytes(24) . time())));
+            $this->setRefreshTokenExpiry($this->getDateFromSeconds(1209600));
 
-        $this->db->bind(':userId', $user->getId());
-        $this->db->bind(':accessToken', $this->accessToken);
-        $this->db->bind(':accessTokenExpiry', $this->accessTokenExpiryTime);
-        $this->db->bind(':refreshToken', $this->refreshToken);
-        $this->db->bind(':refreshTokenExpiry', $this->refreshTokenExpiryTime);
 
-        $this->db->execute();
+            // $this->db->query("INSERT INTO sessions (id, userid, accesstoken, accesstokenexpiry, refreshtoken, refreshtokenexpiry) VALUES (null, :userId, :accessToken, DATE_ADD(NOW(), INTERVAL :accessTokenExpiry SECOND), :refreshToken, DATE_ADD(NOW(), INTERVAL :refreshTokenExpiry SECOND))");
 
-        if ($this->db->rowCount() > 0) {
-            $sessionId = $this->db->lastInsertId();
+            $this->db->query("INSERT INTO sessions (id, userId, accessToken, accessTokenExpiry, refreshToken, refreshTokenExpiry) VALUES (null, :userId, :accessToken, DATE_ADD(NOW(), INTERVAL :accessTokenExpiry SECOND), :refreshToken, DATE_ADD(NOW(), INTERVAL :refreshTokenExpiry SECOND))");
 
-            $this->db->query('SELECT * FROM sessions WHERE id = :sessionId');
+            $this->db->bind(":userId", $user->getId());
+            $this->db->bind(":accessToken", $this->accessToken);
+            // $this->db->bind(":accessTokenExpiry", $this->accessTokenExpiryTime);
+            $this->db->bind(":accessTokenExpiry", 1200);
+            $this->db->bind(":refreshToken", $this->refreshToken);
+            // $this->db->bind(":refreshTokenExpiry", $this->refreshTokenExpiryTime);
+            $this->db->bind(":refreshTokenExpiry", 1209600);
 
-            $this->db->bind(':sessionId', $sessionId);
 
             $this->db->execute();
 
             if ($this->db->rowCount() > 0) {
-                $row = $this->db->single();
+                $sessionId = $this->db->lastInsertId();
 
-                $this->setSessionFromRow($row);
+                $this->db->query('SELECT * FROM sessions WHERE id = :sessionId');
 
-                $sessionArray =  array();
+                $this->db->bind(":sessionId", $sessionId);
 
-                $sessionArray[] = $this->returnSessionAsArray();
+                $this->db->execute();
 
-                $returnData = array();
-                $returnData['rows_returned'] = $this->db->rowCount();
-                $returnData['sessions'] = $sessionArray;
+                if ($this->db->rowCount() > 0) {
 
-                $response = new Response();
-                $response->setHttpStatusCode(201);
-                $response->setSuccess(true);
-                $response->addMessage("Session Created Successfully");
-                $response->setData($returnData);
-                return $response;
-                // $response->send();
-                // exit;
+                    $row = $this->db->single();
+
+                    $this->setSessionFromRow($row);
+
+                    $sessionArray =  array();
+
+                    $sessionArray[] = $this->returnSessionAsArray();
+
+                    $returnData = array();
+                    $returnData['rows_returned'] = $this->db->rowCount();
+                    $returnData["sessions"] = $sessionArray;
+
+                    $response = new Response();
+                    $response->setHttpStatusCode(201);
+                    $response->setSuccess(true);
+                    $response->addMessage("Session Created Successfully");
+                    $response->setData($returnData);
+                    return $response;
+                    // $response->send();
+                    // exit;
+                } else {
+                    $response = new Response();
+                    $response->setHttpStatusCode(500);
+                    $response->setSuccess(false);
+                    $response->addMessage("Couldn't receive information after creating session, please try again");
+                    $response->send();
+                    exit;
+                }
             } else {
                 $response = new Response();
                 $response->setHttpStatusCode(500);
                 $response->setSuccess(false);
-                $response->addMessage("Couldn't receive information after creating session, please try again");
+                $response->addMessage("Something went wrong, please try again");
                 $response->send();
                 exit;
             }
-        } else {
+        } catch (SessionException $ex) {
             $response = new Response();
             $response->setHttpStatusCode(500);
             $response->setSuccess(false);
-            $response->addMessage("Something went wrong, please try again");
+            $response->addMessage($ex->getMessage());
+            $response->send();
+            exit;
+        } catch (PDOException $ex) {
+            error_log("Fun UpdateSession: " . $ex, 0);
+            $response = new Response();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage("Database Error");
             $response->send();
             exit;
         }
@@ -340,7 +365,7 @@ class Session
                 $this->setRefreshToken(base64_encode(bin2hex(openssl_random_pseudo_bytes(24) . time())));
                 $this->setRefreshTokenExpiry($this->getDateFromSeconds(1209600));
 
-                $this->db->query('UPDATE sessions set accessToken = :accessToken, accessTokenExpiry = :accessTokenExpiry, refreshToken = :refreshToken, refreshTokenExpiry = :refreshTokenExpiry WHERE id = :sessionId and userId = :userId');
+                $this->db->query('UPDATE sessions SET accessToken = :accessToken, accessTokenExpiry = :accessTokenExpiry, refreshToken = :refreshToken, refreshTokenExpiry = :refreshTokenExpiry WHERE id = :sessionId and userId = :userId');
 
                 $this->db->bind(':sessionId', $this->id);
                 $this->db->bind(':userId', $this->userId);
@@ -390,7 +415,7 @@ class Session
             if ($this->sessionExists($this->id)) {
 
                 $this->db->query('DELETE FROM sessions where id = :sessionId');
-                $this->db->bind(':sessionId', $this->id);
+                $this->db->bind(":sessionId", $this->id);
 
                 if ($this->db->execute()) {
                     $response = new Response();
@@ -515,12 +540,12 @@ class Session
     // public function loginUser($email = null, $username = null,  $password)
     public function loginUser($email, $username,  $password)
     {
-        $user = new User('tempUser', 'tempPass', null, 'tempFirst', 'tempLast', null, null, null);
+        $user = new User("tempUser", "tempPass", null, "tempFirst", "tempLast", null, null, null);
         try {
             $queryFields = '';
             if (!is_null($username)) {
                 $user->setUsername($username);
-                $queryFields .= 'username = :username AND ';
+                $queryFields .= "username = :username AND ";
             } elseif (!is_null($email)) {
                 $user->setEmail($email);
                 $queryFields .= 'email = :email AND ';
@@ -536,9 +561,9 @@ class Session
             $user->setPassword($password);
             $queryFields .= 'password = :password';
 
-            $this->db->query('SELECT * FROM user where ' . $queryFields);
+            $this->db->query("SELECT * FROM user where " . $queryFields);
 
-            !is_null($email) ? $this->db->bind(':email', $user->getEmail()) : $this->db->bind(':username', $user->getUsername());
+            !is_null($email) ? $this->db->bind(':email', $user->getEmail()) : $this->db->bind(":username", $user->getUsername());
             $this->db->bind(':password', $user->getPassword());
 
             $row = $this->db->single();
@@ -577,10 +602,7 @@ class Session
             $response->send();
             exit;
         }
+
+        //php function to get current time
     }
-
-
-
-    //php function to get current time
-    
 }

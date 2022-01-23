@@ -298,7 +298,7 @@ class Post
     {
         try {
             $this->setId($id);
-            
+
             $this->db->query('SELECT * FROM post where id = :postId');
             $this->db->bind(':postId', $this->id);
 
@@ -331,7 +331,7 @@ class Post
             $this->setUserId($uid);
 
             $this->db->query('SELECT * FROM post WHERE userId = :userId');
-            $this->db->bind(':userId', $this->userId);
+            $this->db->bind(":userId", $this->userId);
 
             $rows = $this->db->resultset();
 
@@ -487,6 +487,7 @@ class Post
             exit;
         }
     }
+
     public function createPost($uid, $data)
     {
         $uid = intval($uid);
@@ -518,7 +519,7 @@ class Post
             $this->db->bind(':postType', $this->postType);
             $this->db->bind(':postRating', $this->postRating);
 
-            if ($this->db->execute()) { 
+            if ($this->db->execute()) {
                 $postId = $this->db->lastInsertId();
                 $this->setId($postId);
 
@@ -532,7 +533,7 @@ class Post
                 }
 
                 $this->db->query('SELECT * FROM  post where id = :postId');
-                $this->db->bind(':postId', $this->id);
+                $this->db->bind(":postId", $this->id);
 
                 $row = $this->db->single();
 
@@ -621,14 +622,14 @@ class Post
             $queryFields = "";
 
             $this->db->query('SELECT * FROM post where id = :postId');
-            $this->db->bind(':postId', $this->id);
+            $this->db->bind(":postId", $this->id);
 
             $row = $this->db->single();
 
             $this->setPostFromRow($row);
 
             if (array_key_exists('bookName', $data)) {
-                if ((strcmp($data['bookName'], $this->bookName)) != 0) {
+                if ((strcmp($data["bookName"], $this->bookName)) != 0) {
                     $bookNameUpdated = true;
                     $this->setBookName($data['bookName']);
                     $queryFields .= "bookName = :bookName, ";
@@ -637,7 +638,7 @@ class Post
 
             if (array_key_exists('author', $data)) {
                 if (!is_null($this->author)) {
-                    if ((strcmp($data['author'], $this->author)) != 0) {
+                    if ((strcmp($data["author"], $this->author)) != 0) {
                         $authorUpdated = true;
                         $this->setAuthor($data['author']);
                         $queryFields .= "author = :author, ";
@@ -650,7 +651,7 @@ class Post
             }
 
             if (array_key_exists('description', $data)) {
-                if ((strcmp($data['description'], $this->description)) != 0) {
+                if ((strcmp($data["description"], $this->description)) != 0) {
                     $descriptionUpdated = true;
                     $this->setDescription($data['description']);
                     $queryFields .= "description = :description, ";
@@ -658,7 +659,7 @@ class Post
             }
 
             if (array_key_exists('boughtDate', $data)) {
-                if ((strcmp($data['boughtDate'], $this->boughtDate)) != 0) {
+                if ((strcmp($data["boughtDate"], $this->boughtDate)) != 0) {
                     $boughtDateUpdated = true;
                     $this->setBoughtDate($data['boughtDate']);
                     $queryFields .= "boughtDate = :boughtDate, ";
@@ -666,7 +667,7 @@ class Post
             }
 
             if (array_key_exists('price', $data)) {
-                if ((strcmp($data['price'], $this->price)) != 0) {
+                if ((strcmp($data["price"], $this->price)) != 0) {
                     $priceUpdated = true;
                     $this->setPrice($data['price']);
                     $queryFields .= "price = :price, ";
@@ -674,7 +675,7 @@ class Post
             }
 
             if (array_key_exists('bookCount', $data)) {
-                if ((strcmp($data['bookCount'], $this->bookCount)) != 0) {
+                if ((strcmp($data["bookCount"], $this->bookCount)) != 0) {
                     $bookCountUpdated = true;
                     $this->setBookCount($data['bookCount']);
                     $queryFields .= "bookCount = :bookCount, ";
@@ -682,7 +683,7 @@ class Post
             }
 
             if (array_key_exists('wishlisted', $data)) {
-                if ((strcmp($data['wishlisted'], $this->wishlistd)) != 0) {
+                if ((strcmp($data["wishlisted"], $this->wishlistd)) != 0) {
                     $wishlistedUpd = true;
                     $this->setBookWishlist($data['wishlisted']);
                     $queryFields .= "wishlisted = :wishlisted, ";
@@ -690,7 +691,7 @@ class Post
             }
 
             if (array_key_exists('postType', $data)) {
-                if ((strcmp($data['postType'], $this->postType)) != 0) {
+                if ((strcmp($data["postType"], $this->postType)) != 0) {
                     $postTypeUpdated = true;
                     $this->setPostType($data['postType']);
                     $queryFields .= "postType = :postType, ";
@@ -699,7 +700,7 @@ class Post
 
             if (array_key_exists('postRating', $data)) {
                 if (is_null($this->postRating)) {
-                    if ((strcmp($data['postRating'], $this->postRating)) != 0) {
+                    if ((strcmp($data["postRating"], $this->postRating)) != 0) {
                         $postRatingUpdated = true;
                         $this->setPostRating($data['postRating']);
                         $queryFields .= "postRating = :postRating, ";
@@ -726,32 +727,32 @@ class Post
             $this->db->bind(':postId', $this->id);
 
             if ($bookNameUpdated)
-                $this->db->bind(':bookName', $this->bookName);
+                $this->db->bind(":bookName", $this->bookName);
 
             if ($authorUpdated)
-                $this->db->bind(':author', $this->author);
+                $this->db->bind(":author", $this->author);
 
             if ($descriptionUpdated)
-                $this->db->bind(':description', $this->description);
+                $this->db->bind(":description", $this->description);
 
             if ($boughtDateUpdated)
-                $this->db->bind(':boughtDate', $this->boughtDate);
+                $this->db->bind(":boughtDate", $this->boughtDate);
 
             if ($priceUpdated)
-                $this->db->bind(':price', $this->price);
-            
+                $this->db->bind(":price", $this->price);
+
             if ($bookCountUpdated)
-                $this->db->bind(':bookCount', $this->bookCount);
+                $this->db->bind(":bookCount", $this->bookCount);
 
             if ($wishlistdUpdated)
-                $this->db->bind(':wishlisted', $this->wishlistd);
+                $this->db->bind(":wishlisted", $this->wishlistd);
 
             if ($postTypeUpdated)
-                $this->db->bind(':postType', $this->postType);
+                $this->db->bind(":postType", $this->postType);
 
 
             if ($postRatingUpdated)
-                $this->db->bind(':postRating', $this->postRating);
+                $this->db->bind(":postRating", $this->postRating);
 
             $this->db->execute();
 
@@ -766,8 +767,8 @@ class Post
 
                 $returnData = array();
 
-                $returnData['rows_returned'] = $this->db->rowCount();
-                $returnData['posts'] = $postArray;
+                $returnData["rows_returned"] = $this->db->rowCount();
+                $returnData["posts"] = $postArray;
 
                 $response = new Response();
                 $response->setHttpStatusCode(200);

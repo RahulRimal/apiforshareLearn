@@ -1,11 +1,13 @@
 <?php
 
 require('../../../core/init.php');
-require_once('../libraries/Session.php');
-require_once('../libraries/User.php');
+require_once('../libraries/Chat.php');
 require_once('../libraries/Response.php');
+require_once('../libraries/Session.php');
+
 
 ?>
+
 
 <?php
 
@@ -21,34 +23,43 @@ if (!isset($_SERVER['HTTP_AUTHORIZATION']) || strlen($_SERVER['HTTP_AUTHORIZATIO
 
 $accessToken = $_SERVER['HTTP_AUTHORIZATION'];
 
-// Getting Existing User
-// /users/1
+$sess = new Session();
+
+$sessionInfo = $sess->getSessionInfo($accessToken);
+
+$uId = $sessionInfo->getUserId();
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
-    if (isset($_GET['user'])) {
-        $uId = $_GET['user'];
-        $user = new User('tempUser', 'tempPass', null, 'tempFirst', 'tempLast', null, null, null);
-        $response = $user->getDetails($uId);
+    if (isset($_GET['nextUser']) && isset($_GET['single'])) {
 
+        $nextUId = $_GET['nextUser'];
+
+        $chat = new Chat();
+
+        $response = $chat->getSingleMessage($uId, $nextUId);
         $response->send();
-        exit;
-    } elseif(isset($_SERVER['HTTP_AUTHORIZATION']))
-    {
-        $sess = new Session();
+    } elseif (isset($_GET['nextUser']) && isset($_GET['double'])) {
 
-        $sess->getSessionInfo($accessToken);
+        $nextUId = $_GET['nextUser'];
 
-        $user = new User('tempUser', 'tempPass', null, 'tempFirst', 'tempLast', null, null, null);
-        $response = $user->getDetails($sess->getUserId());
+        $chat = new Chat();
+
+        $response = $chat->getAMessage($uId, $nextUId);
         $response->send();
-        exit;
-    }
-    else {
+    } elseif (isset($_GET['nextUser'])) {
+
+        $nextUId = $_GET['nextUser'];
+
+        $chat = new Chat();
+
+        $response = $chat->getAllMessages($uId, $nextUId);
+        $response->send();
+    } else {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
-        $response->addMessage("User id not set");
+        $response->addMessage("Two users required to get messages");
         $response->send();
         exit;
     }
@@ -63,7 +74,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             exit;
         }
     }
-
     if (!isset($_SERVER['CONTENT_TYPE'])) {
         $response = new Response();
         $response->setHttpStatusCode(400);
@@ -72,7 +82,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $response->send();
         exit;
     }
-
 
     $rawData = file_get_contents('php://input');
 
@@ -85,29 +94,66 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         exit;
     }
 
-    if (!isset($jsonData->username) || !isset($jsonData->password) || !isset($jsonData->firstName) || !isset($jsonData->lastName)) {
+    $sess = new Session();
+
+    $sess = $sess->getSessionInfo($accessToken);
+
+    $uId = $sess->getUserId();
+
+    // if (!isset($jsonData->outgoingId) || !isset($jsonData->incomingId) || !isset($jsonData->message) || !isset($jsonData->messageSentDate)) {
+    if (!isset($jsonData->outgoingId) || !isset($jsonData->incomingId) || !isset($jsonData->message)) {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
-        !isset($jsonData->username) ? $response->addMessage("Username is required") : false;
-        !isset($jsonData->password) ? $response->addMessage("Password is required") : false;
-        !isset($jsonData->firstName) ? $response->addMessage("First name is required") : false;
-        !isset($jsonData->lastName) ? $response->addMessage("Last name is required") : false;
+        !isset($jsonData->outgoingId) ? $response->addMessage("Outgoing id is required to post a message") : false;
+        !isset($jsonData->incomingId) ? $response->addMessage("Incoming id is required to post a message") : false;
+        !isset($jsonData->message) ? $response->addMessage("Message body is required to post a message") : false;
+        !isset($jsonData->messageSentDate) ? $response->addMessage("Message sent date is required to post a message") : false;
         $response->send();
         exit;
     }
 
-    try {
-        $newUser = new User($jsonData->username, $jsonData->password, isset($jsonData->email) ? $jsonData->email : null, $jsonData->firstName, $jsonData->lastName, isset($jsonData->class) ? $jsonData->class : null, isset($jsonData->description) ? $jsonData->description : null, isset($jsonData->followers) ? $jsonData->followers : null);
+    $data = array();
 
-        $response = $newUser->createNewUser();
+    if (isset($jsonData->outgoingId))
+        $data['outgoingId'] = $jsonData->outgoingId;
+
+    if (isset($jsonData->incomingId))
+        $data['incomingId'] = $jsonData->incomingId;
+
+    if (isset($jsonData->message))
+        $data['message'] = $jsonData->message;
+
+    // if (isset($jsonData->messageSentDate))
+    //     $data['messageSentDate'] = $jsonData->messageSentDate;
+
+
+    $chat = new Chat();
+    $response = $chat->createMessage($data['outgoingId'], $data['incomingId'], $data);
+    $response->send();
+    exit();
+} elseif ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
+
+    $sess = new Session();
+
+    $sess = $sess->getSessionInfo($accessToken);
+
+    $uId = $sess->getUserId();
+
+    if (isset($_GET['chat'])) {
+
+        $id = $_GET['chat'];
+
+        $chat = new Chat();
+        $response = $chat->deleteMessage($id);
+
         $response->send();
         exit;
-    } catch (UserException $ex) {
+    } else {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
-        $response->addMessage($ex->getMessage());
+        $response->addMessage("Chat ID required to delete the chat");
         $response->send();
         exit;
     }
@@ -123,7 +169,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             exit;
         }
     }
-
     if (!isset($_SERVER['CONTENT_TYPE'])) {
         $response = new Response();
         $response->setHttpStatusCode(400);
@@ -144,40 +189,35 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         exit;
     }
 
-    if (isset($_GET['user'])) {
-        $uId = $_GET['user'];
+    $sess = new Session();
 
-        $user = new User('tempUser', 'tempPass', null, 'tempFirst', 'tempLast', null, null, null);
+    $sess = $sess->getSessionInfo($accessToken);
 
-        if (!isset($jsonData->password) && !isset($jsonData->email) && !isset($jsonData->firstName) && !isset($jsonData->lastName) && !isset($jsonData->class) && !isset($jsonData->description)) {
-            $response = new Response();
-            $response->setHttpStatusCode(400);
-            $response->setSuccess(false);
-            $response->addMessage("No information to update");
-            $response->send();
-            exit;
-        }
+    $uId = $sess->getUserId();
 
-        if (isset($jsonData->password) || isset($jsonData->email) || isset($jsonData->firstName) || isset($jsonData->lastName) || isset($jsonData->class) || isset($jsonData->description)) {
-            $receivedData = array();
+    if (isset($_GET['chat'])) {
 
-            isset($jsonData->password) ? $receivedData['password'] = $jsonData->password : false;
-            isset($jsonData->email) ? $receivedData['email'] = $jsonData->email : false;
-            isset($jsonData->firstName) ? $receivedData['firstName'] = $jsonData->firstName : false;
-            isset($jsonData->lastName) ? $receivedData['lastName'] = $jsonData->lastName : false;
-            isset($jsonData->class) ? $receivedData['class'] = $jsonData->class : false;
-            isset($jsonData->description) ? $receivedData['description'] = $jsonData->description : false;
-            $response = $user->updateInfo($uId, $receivedData);
+        $id = $_GET['chat'];
+
+        $data = array();
+        $data['id'] = $id;
+
+        if (isset($jsonData->id) || isset($jsonData->outgoingId) || isset($jsonData->incomingId) || isset($jsonData->message) || isset($jsonData->messageSentDate)) {
+            isset($jsonData->id) ? $data['id'] = $jsonData->id : false;
+            isset($jsonData->outgoingId) ? $data['outgoingId'] = $jsonData->outgoingId : false;
+            isset($jsonData->incomingId) ? $data['incomingId'] = $jsonData->incomingId : false;
+            isset($jsonData->message) ? $data['message'] = $jsonData->message : false;
+            isset($jsonData->messageSentDate) ? $data['messageSentDate'] = $jsonData->messageSentDate : false;
+
+            $chat = new Chat();
+            $response = $chat->updateMessage($id, $data);
             $response->send();
             exit;
         } else {
             $response = new Response();
             $response->setHttpStatusCode(400);
             $response->setSuccess(false);
-            isset($jsonData->username) ? $response->addMessage('Username can\'t be updated') : false;
-            isset($jsonData->id) ? $response->addMessage('User ID can\'t be updated') : false;
-            isset($jsonData->followers) ? $response->addMessage('Followers can\'t be updated manually') : false;
-            isset($jsonData->userCreatedDate) ? $response->addMessage('User Signed up date can\'t be updated') : false;
+            $response->addMessage("Nothing changed to update");
             $response->send();
             exit;
         }
@@ -185,23 +225,32 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
-        $response->addMessage("User is required to update information");
+        $response->addMessage("Message id required to update the chat");
         $response->send();
         exit;
     }
 } elseif ($_SERVER['REQUEST_METHOD'] == 'DELETE') {
-    if (isset($_GET['user'])) {
-        $uId = $_GET['user'];
 
-        $user = new User('tempUser', 'tempPass', null, 'tempFirst', 'tempLast', null, null, null);
-        $response = $user->deleteUser($uId);
+    $sess = new Session();
+
+    $sess = $sess->getSessionInfo($accessToken);
+
+    $uId = $sess->getUserId();
+
+    if (isset($_GET['chat'])) {
+
+        $id = $_GET['chat'];
+
+        $chat = new Chat();
+        $response = $chat->deleteMessage($id);
+
         $response->send();
         exit;
     } else {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
-        $response->addMessage("User is required for deletion");
+        $response->addMessage("Message ID required to delete the message");
         $response->send();
         exit;
     }
@@ -213,7 +262,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $response->send();
     exit;
 }
-
 
 
 

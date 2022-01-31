@@ -56,11 +56,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         exit;
     }
 
-    if (!isset($jsonData->userId)) {
+    // if (!isset($jsonData->userId)) {
+    //     $response = new Response();
+    //     $response->setHttpStatusCode(400);
+    //     $response->setSuccess(false);
+    //     $response->addMessage("User ID required to create a session");
+    //     $response->send();
+    //     exit;
+    // }
+
+    if (!isset($jsonData->username) && !isset($jsonData->email)) {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
-        $response->addMessage("User ID required to create a session");
+        $response->addMessage("Username or email required to create a session");
         $response->send();
         exit;
     }

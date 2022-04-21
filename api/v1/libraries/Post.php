@@ -345,7 +345,7 @@ class Post
                     $postArray[] = $this->returnPostAsArray();
                 }
 
-                $returnData = array();
+                    $returnData = array();
                 $returnData['rows_returned'] = $this->db->rowCount();
                 $returnData['posts'] = $postArray;
 
@@ -754,7 +754,12 @@ class Post
             if ($postRatingUpdated)
                 $this->db->bind(":postRating", $this->postRating);
 
+                // die(var_dump($this->db));
+
             $this->db->execute();
+            // $this->db->execute() or die ("SQL Error: $DBI::errstr\n");
+
+            // die(mysqli_error($this->db->execute()));
 
             if ($this->db->rowCount() > 0) {
 
@@ -779,6 +784,7 @@ class Post
                 // $response->send();
                 // exit;
             } else {
+
                 $response = new Response();
                 $response->setHttpStatusCode(500);
                 $response->setSuccess(false);

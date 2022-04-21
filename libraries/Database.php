@@ -52,6 +52,7 @@ class Database {
 	
 	public function execute(){
 		return $this->stmt->execute();
+
 	}
 	
 	

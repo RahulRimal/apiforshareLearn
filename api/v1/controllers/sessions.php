@@ -36,7 +36,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     sleep(1);
 
-    if (isset($_SERVER['CONTENT_TYPE']) && $_SERVER['CONTENT_TYPE'] != 'application/json') {
+    if (isset($_SERVER['CONTENT_TYPE']) &&
+    (
+        ($_SERVER['CONTENT_TYPE'] != 'application/json')
+    &&
+    ($_SERVER['CONTENT_TYPE'] != 'application/json; charset=utf-8')
+    // ||
+    // ($_SERVER['CONTENT_TYPE'] != 'application/json; charset=utf-8')
+    )) {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);

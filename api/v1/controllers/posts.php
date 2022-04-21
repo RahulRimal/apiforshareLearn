@@ -147,17 +147,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     $response->send();
     exit();
 } elseif ($_SERVER['REQUEST_METHOD'] == 'PATCH') {
-    if (isset($_SERVER['CONTENT_TYPE'])) {
-        if ($_SERVER['CONTENT_TYPE'] != 'application/json') {
-            $response = new Response();
-            $response->setHttpStatusCode(400);
-            $response->setSuccess(false);
-            $response->addMessage("Header type not set to JSON");
-            $response->send();
-            exit;
-        }
-    }
-    if (!isset($_SERVER['CONTENT_TYPE'])) {
+    sleep(1);
+
+    if (isset($_SERVER['CONTENT_TYPE']) &&
+    (
+        ($_SERVER['CONTENT_TYPE'] != 'application/json')
+    &&
+    ($_SERVER['CONTENT_TYPE'] != 'application/json; charset=utf-8')
+    // ||
+    // ($_SERVER['CONTENT_TYPE'] != 'application/json; charset=utf-8')
+    )) {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);

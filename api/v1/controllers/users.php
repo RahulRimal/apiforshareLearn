@@ -33,7 +33,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
         $response->send();
         exit;
-    } elseif(isset($_SERVER['HTTP_AUTHORIZATION']))
+    }
+    elseif(isset($_GET['userPublicInfo'])) {
+        $uId = $_GET['userPublicInfo'];
+        $user = new User('tempUser', 'tempPass', null, 'tempFirst', 'tempLast', null, null, null);
+        $response = $user->getPublicDetails($uId);
+
+        $response->send();
+        exit;
+    }
+    elseif(isset($_SERVER['HTTP_AUTHORIZATION']))
     {
         $sess = new Session();
 

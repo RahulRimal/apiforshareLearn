@@ -439,6 +439,64 @@ class Post
         }
     }
 
+    public function getAnnonimusPost()
+    {
+        try {
+
+            $this->db->query('SELECT * FROM post LIMIT 10');
+
+            $rows = $this->db->resultset();
+
+            if ($this->db->rowCount() > 0) {
+
+                $postArray = array();
+
+                foreach ($rows as $row) {
+                    $this->setPostFromRow($row);
+
+                    $postArray[] = $this->returnPostAsArray();
+                }
+
+                    $returnData = array();
+                $returnData['rows_returned'] = $this->db->rowCount();
+                $returnData['posts'] = $postArray;
+
+                $response = new Response();
+                $response->setHttpStatusCode(200);
+                $response->setSuccess(true);
+                $response->addMessage('Posts retrievd successfully');
+                $response->setData($returnData);
+                return $response;
+                // $response->send();
+                // exit;
+            } else {
+                $response = new Response();
+                $response->setHttpStatusCode(500);
+                $response->setSuccess(false);
+                $response->addMessage('Couldn\'t retrieve posts, please try again');
+                $response->send();
+                exit;
+            }
+        } catch (PostException $ex) {
+            $response = new Response();
+            $response->setHttpStatusCode(400);
+            $response->setSuccess(false);
+            $response->addMessage($ex->getMessage());
+            $response->send();
+            exit;
+        } catch (PDOException $ex) {
+            error_log("Fun getUsersPost: " . $ex, 0);
+            $response = new Response();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage("Database Error");
+            $response->send();
+            exit;
+        }
+    }
+
+    
+
     public function postExists($uid, $bookId = null, $bookName = null)
     {
         try {

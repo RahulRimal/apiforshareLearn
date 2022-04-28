@@ -334,6 +334,36 @@ class User
         exit;
     }
 
+    public function getPublicDetails($uid)
+    {
+        $uid = intval($uid);
+
+        $this->setId($uid);
+
+        $row = $this->getUserByID($this->id);
+
+        $this->setUserFromRow($row);
+
+        $userArray = array();
+        $userArray[] = $this->returnUserAsArray();
+
+        $returnData = array();
+
+        $returnData['rows_returned'] = $this->db->rowCount();
+        $returnData['user'] = $userArray;
+
+
+        $response = new Response();
+        $response->setHttpStatusCode(200);
+        $response->setSuccess(true);
+        $response->toCache(true);
+        $response->addMessage("User Public Information Received successfully");
+        $response->setData($returnData);
+        // $response->send();
+        return $response;
+        exit;
+    }
+
 
     public function userExists($id = null, $username = null)
     {

@@ -42,14 +42,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $response->send();
         exit;
     }
-    //  else {
-    //     $response = new Response();
-    //     $response->setHttpStatusCode(400);
-    //     $response->setSuccess(false);
-    //     $response->addMessage("User ID required to get Posts");
-    //     $response->send();
-    //     exit;
-    // }
 
     elseif (isset($_GET['post'])) {
 
@@ -59,14 +51,23 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $response = $post->getPostById($postId);
         $response->send();
         exit;
-    } else {
-        $response = new Response();
-        $response->setHttpStatusCode(400);
-        $response->setSuccess(false);
-        $response->addMessage("Post ID or User ID required to get Posts");
-        $response->send();
-        exit;
     }
+    // else {
+    //     $response = new Response();
+    //     $response->setHttpStatusCode(400);
+    //     $response->setSuccess(false);
+    //     $response->addMessage("Post ID or User ID required to get Posts");
+    //     $response->send();
+    //     exit;
+    // }
+        else
+        {
+            $post = new Post();
+            $response = $post->getAnnonimusPost();
+            $response->send();
+            exit;
+        }
+
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (isset($_SERVER['CONTENT_TYPE'])) {
         if ($_SERVER['CONTENT_TYPE'] != 'application/json') {

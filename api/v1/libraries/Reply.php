@@ -161,6 +161,8 @@ class Reply
 
             $rows = $this->db->resultset();
 
+            // die(var_dump($rows));
+
             if ($this->db->rowCount() > 0) {
                 $replyArray = array();
 
@@ -184,7 +186,8 @@ class Reply
                 $response = new Response();
                 $response->setHttpStatusCode(500);
                 $response->setSuccess(false);
-                $response->addMessage('Could\'t retrieve replies, please try again');
+                // $response->addMessage('Could\'t retrieve replies, please try again');
+                $response->addMessage('No replies found for the post');
                 $response->send();
                 exit;
             }
@@ -509,9 +512,9 @@ class Reply
             $queryFields = "";
 
             if (array_key_exists('userId', $data)) {
-                if ((strcmp($data['userId'], $this->userId)) != 0) {
+                if ((strcmp(intval($data['userId']), $this->userId)) != 0) {
                     $userIdUpdated = true;
-                    $this->setUserId($data['userId']);
+                    $this->setUserId(intval($data['userId']));
                     $queryFields .= "userId = :userId, ";
                 }
             }
@@ -533,7 +536,7 @@ class Reply
             if (array_key_exists('createdDate', $data)) {
                 if ((strcmp($data['createdDate'], $this->createdDate)) != 0) {
                     $createdDateUpdated = true;
-                    $this->setUserId($data['createdDate']);
+                    $this->setCreatedDate($data['createdDate']);
                     $queryFields .= "createdDate = :createdDate, ";
                 }
             }

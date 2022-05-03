@@ -204,11 +204,11 @@ class User
             if (strlen($picture) > 255)
                 throw new UserException('Picture too long');
             else
-                // $this->picture = $picture;
-                $this->picture =  BASE_URI . 'images/profile-pics/'. $this->getFristName() .'/'. $picture;
+                $this->picture = $picture;
+                // $this->picture =  BASE_URI . 'images/profile-pics/'. $this->getFristName() .'/'. $picture;
         } else
-            // $this->picture = $picture;
-            $this->picture =  BASE_URI . 'images/profile-pics/'. $this->getFristName() .'/'. $picture;
+            $this->picture = $picture;
+            // $this->picture =  BASE_URI . 'images/profile-pics/'. $this->getFristName() .'/'. $picture;
     }
 
     public function setClass($class)
@@ -253,7 +253,9 @@ class User
     {
         $user = array();
         $user['id'] = $this->id;
-        $user['name'] = $this->firstName . ' ' . $this->lastName;
+        // $user['name'] = $this->firstName . ' ' . $this->lastName;
+        $user['firstName'] = $this->firstName;
+        $user['lastName'] = $this->lastName;
         $user['username'] = $this->username;
         $user['email'] = $this->email;
         $user['picture'] = $this->picture;

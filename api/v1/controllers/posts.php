@@ -69,17 +69,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         }
 
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (isset($_SERVER['CONTENT_TYPE'])) {
-        if ($_SERVER['CONTENT_TYPE'] != 'application/json') {
-            $response = new Response();
-            $response->setHttpStatusCode(400);
-            $response->setSuccess(false);
-            $response->addMessage("Header type not set to JSON");
-            $response->send();
-            exit;
-        }
-    }
-    if (!isset($_SERVER['CONTENT_TYPE'])) {
+    sleep(1);
+
+    if (isset($_SERVER['CONTENT_TYPE']) &&
+    (
+        ($_SERVER['CONTENT_TYPE'] != 'application/json')
+    &&
+    ($_SERVER['CONTENT_TYPE'] != 'application/json; charset=utf-8')
+    // ||
+    // ($_SERVER['CONTENT_TYPE'] != 'application/json; charset=utf-8')
+    )) {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
@@ -105,13 +104,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
     $uId = $sess->getUserId();
 
-    if (!isset($jsonData->bookName) || !isset($jsonData->description) || !isset($jsonData->boughtDate) || !isset($jsonData->price) || !isset($jsonData->postType) || !isset($jsonData->postedOn)) {
+    if (!isset($jsonData->bookName) || !isset($jsonData->description) || !isset($jsonData->boughtDate) || !isset($jsonData->bookCount) || !isset($jsonData->price) || !isset($jsonData->postType) || !isset($jsonData->postedOn)) {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
         !isset($jsonData->bookName) ? $response->addMessage("Book name is required to create a post") : false;
         !isset($jsonData->description) ? $response->addMessage("Book description is required to create a post") : false;
         !isset($jsonData->boughtDate) ? $response->addMessage("Book bought date is required to create a post") : false;
+        !isset($jsonData->bookCount) ? $response->addMessage("Book Count is required to create a post") : false;
         !isset($jsonData->price) ? $response->addMessage("Book price is required to create a post") : false;
         !isset($jsonData->postType) ? $response->addMessage("Post type is required to create a post") : false;
         !isset($jsonData->postedOn) ? $response->addMessage("Post creation date is required to create a post") : false;
@@ -132,6 +132,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
     if (isset($jsonData->boughtDate))
         $data['boughtDate'] = $jsonData->boughtDate;
+    
+    if (isset($jsonData->bookCount))
+        $data['bookCount'] = $jsonData->bookCount;
 
     if (isset($jsonData->price))
         $data['price'] = $jsonData->price;
@@ -141,6 +144,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
     if (isset($jsonData->postRating))
         $data['postRating'] = $jsonData->postRating;
+
+    if (isset($jsonData->wishlisted))
+        $data['wishlisted'] = $jsonData->wishlisted;
+    else
+        $data['wishlisted'] = 2;
 
 
     $post = new Post();

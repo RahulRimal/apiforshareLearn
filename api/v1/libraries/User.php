@@ -20,12 +20,13 @@ class User
     private $email;
     private $firstName;
     private $lastName;
+    private $picture;
     private $class;
     private $description;
     private $followers;
     private $userCreatedDate;
 
-    public function __construct($username, $password, $email = null, $firstName, $lastName, $class = null, $description = null, $followers = null)
+    public function __construct($username, $password, $email = null, $firstName, $lastName, $class = null, $picture = null, $description = null, $followers = null)
     {
         try {
             $this->db = new Database();
@@ -44,6 +45,7 @@ class User
         $this->setEmail($email);
         $this->setFirstName($firstName);
         $this->setLastName($lastName);
+        $this->setPicture($picture);
         $this->setclass($class);
         $this->setDescription($description);
         $this->setFollowers($followers);
@@ -77,6 +79,11 @@ class User
     public function getLastName()
     {
         return $this->lastName;
+    }
+
+    public function getPicture()
+    {
+        return $this->picture;
     }
 
     public function getClass()
@@ -191,6 +198,19 @@ class User
             $this->lastName = $lastname;
     }
 
+    public function setPicture($picture)
+    {
+        if (!is_null($picture)) {
+            if (strlen($picture) > 255)
+                throw new UserException('Picture too long');
+            else
+                // $this->picture = $picture;
+                $this->picture =  BASE_URI . 'images/profile-pics/'. $this->getFristName() .'/'. $picture;
+        } else
+            // $this->picture = $picture;
+            $this->picture =  BASE_URI . 'images/profile-pics/'. $this->getFristName() .'/'. $picture;
+    }
+
     public function setClass($class)
     {
         if (!is_null($class)) {
@@ -236,6 +256,7 @@ class User
         $user['name'] = $this->firstName . ' ' . $this->lastName;
         $user['username'] = $this->username;
         $user['email'] = $this->email;
+        $user['picture'] = $this->picture;
         $user['description'] = $this->description;
         $user['class'] = $this->class;
         $user['followers'] = $this->followers;
@@ -252,6 +273,7 @@ class User
         $this->setEmail($row->email);
         $this->setFirstName($row->firstName);
         $this->setLastName($row->lastName);
+        $this->setPicture($row->picture);
         $this->setDescription($row->description);
         $this->setClass($row->class);
         $this->setFollowers($row->followers);

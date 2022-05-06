@@ -7,8 +7,6 @@ require_once('../helpers/session_helper.php');
 
 ?>
 
-
-
 <?php
 
 if ($_SERVER['REQUEST_METHOD'] == 'GET') {

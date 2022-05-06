@@ -16,6 +16,10 @@ RewriteRule ^posts$ api/v1/controllers/posts.php [L]
 RewriteRule ^posts/u/([0-9]+)$ api/v1/controllers/posts.php?user=$1 [L]
 RewriteRule ^posts/p/([0-9]+)$ api/v1/controllers/posts.php?post=$1 [L]
 
+RewriteRule ^orders$ api/v1/controllers/orders.php [L]
+RewriteRule ^orders/([0-9]+)$ api/v1/controllers/orders.php?order=$1 [L]
+RewriteRule ^orders/u/([0-9]+)$ api/v1/controllers/orders.php?user=$1 [L]
+
 RewriteRule ^replies$ api/v1/controllers/replies.php [L]
 RewriteRule ^replies/([0-9]+)$ api/v1/controllers/replies.php?reply=$1 [L]
 RewriteRule ^replies/p/([0-9]+)$ api/v1/controllers/replies.php?post=$1 [L]

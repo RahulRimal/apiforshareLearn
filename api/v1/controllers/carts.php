@@ -1,6 +1,6 @@
 <?php
 require('../../../core/init.php');
-require_once('../libraries/Order.php');
+require_once('../libraries/Cart.php');
 require_once('../libraries/Response.php');
 require_once('../libraries/Session.php');
 
@@ -34,12 +34,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
     // $response = new Response();
 
-    if (isset($_GET['order'])) {
+    if (isset($_GET['cart'])) {
 
-        $id = $_GET['order'];
+        $id = $_GET['cart'];
 
-        $order = new Order();
-        $response = $order->getOrderById($id);
+        $cart = new Cart();
+        $response = $cart->getCartItemById($id);
         $response->send();
         exit;
     }
@@ -48,8 +48,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
         $userId = $_GET['user'];
 
-        $order = new Order();
-        $response = $order->getUserOrders($userId);
+        $cart = new Cart();
+        $response = $cart->getUserCartItems($userId);
         $response->send();
         exit;
     }
@@ -63,8 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     // }
         else
         {
-            $order = new Order();
-            $response = $order->getAnnonimusOrder();
+            $cart = new Cart();
+            $response = $cart->getAnnonimusCartItems();
             $response->send();
             exit;
         }
@@ -109,13 +109,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
-        !isset($jsonData->bookId) ? $response->addMessage("Book ID is required to place an order") : false;
-        !isset($jsonData->sellingUserId) ? $response->addMessage("Selling User ID is required to place an order") : false;
-        !isset($jsonData->buyingUserId) ? $response->addMessage("Buying User ID is required to place an order") : false;
-        !isset($jsonData->bookCount) ? $response->addMessage("Book Count is required to place an order") : false;
-        !isset($jsonData->pricePerPiece) ? $response->addMessage("Price per piece is required to place an order") : false;
-        !isset($jsonData->postType) ? $response->addMessage("Post type is required to place an order") : false;
-        !isset($jsonData->wishlisted) ? $response->addMessage("Post wishlisted is required to place an order") : false;
+        !isset($jsonData->bookId) ? $response->addMessage("Book ID is required to place an cart") : false;
+        !isset($jsonData->sellingUserId) ? $response->addMessage("Selling User ID is required to place an cart") : false;
+        !isset($jsonData->buyingUserId) ? $response->addMessage("Buying User ID is required to place an cart") : false;
+        !isset($jsonData->bookCount) ? $response->addMessage("Book Count is required to place an cart") : false;
+        !isset($jsonData->pricePerPiece) ? $response->addMessage("Price per piece is required to place an cart") : false;
+        !isset($jsonData->postType) ? $response->addMessage("Post type is required to place an cart") : false;
+        !isset($jsonData->wishlisted) ? $response->addMessage("Post wishlisted is required to place an cart") : false;
         $response->send();
         exit;
     }
@@ -152,8 +152,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $data['wishlisted'] = 2;
 
 
-    $order = new Order();
-    $response = $order->createOrder($uId, $data);
+    $cart = new Cart();
+    $response = $cart->createCartItem($uId, $data);
     $response->send();
     exit();
 } elseif ($_SERVER['REQUEST_METHOD'] == 'PATCH') {
@@ -192,9 +192,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
     $uId = $sess->getUserId();
 
-    if (isset($_GET['order'])) {
+    if (isset($_GET['cart'])) {
 
-        $id = $_GET['order'];
+        $id = $_GET['cart'];
 
         $data = array();
         $data['userId'] = $uId;
@@ -204,9 +204,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
-        !isset($jsonData->buyingUserId) ? $response->addMessage("Buying User ID is required to update an order") : false;
-        !isset($jsonData->bookId) ? $response->addMessage("Book ID is required to update an order") : false;
-        // $response->addMessage("Buying User ID is required to update an order");
+        !isset($jsonData->buyingUserId) ? $response->addMessage("Buying User ID is required to update an cart") : false;
+        !isset($jsonData->bookId) ? $response->addMessage("Book ID is required to update an cart") : false;
+        // $response->addMessage("Buying User ID is required to update an cart");
         $response->send();
         exit;
         }
@@ -221,8 +221,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             isset($jsonData->postType) ? $data['postType'] = $jsonData->postType : false;
             isset($jsonData->wishlisted) ? $data['wishlisted'] = $jsonData->wishlisted : false;
 
-            $order = new Order();
-            $response = $order->updateOrder($id, $data);
+            $cart = new Cart();
+            $response = $cart->updateCartItem($id, $data);
             $response->send();
             exit;
         } else {
@@ -249,12 +249,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
     $uId = $sess->getUserId();
 
-    if (isset($_GET['order'])) {
+    if (isset($_GET['cart'])) {
 
-        $id = $_GET['order'];
+        $id = $_GET['cart'];
 
-        $order = new Order();
-        $response = $order->deleteOrder($id, $uId);
+        $cart = new Cart();
+        $response = $cart->deleteCartItem($id, $uId);
 
         $response->send();
         exit;

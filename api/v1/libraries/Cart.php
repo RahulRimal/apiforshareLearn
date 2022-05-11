@@ -1,10 +1,10 @@
 <?php
 
-class OrderException extends Exception
+class CartException extends Exception
 {
 }
 
-class Order
+class Cart
 {
     private $db;
 
@@ -77,11 +77,11 @@ class Order
     public function setId($id)
     {
         if (is_null($id))
-            throw new OrderException('Order ID can\'t be null');
+            throw new CartException('Cart ID can\'t be null');
         elseif (empty($id))
-            throw new OrderException('Order ID can\'t be empty');
+            throw new CartException('Cart ID can\'t be empty');
         elseif (!is_numeric($id))
-            throw new OrderException('Order ID must be a number');
+            throw new CartException('Cart ID must be a number');
         else
             $this->id = $id;
     }
@@ -89,11 +89,11 @@ class Order
     public function setBookId($bookId)
     {
         if (is_null($bookId))
-            throw new OrderException('Book ID can\'t be null');
+            throw new CartException('Book ID can\'t be null');
         elseif (empty($bookId))
-            throw new OrderException('Book ID can\'t be empty');
+            throw new CartException('Book ID can\'t be empty');
         elseif (!is_numeric($bookId))
-            throw new OrderException('Book ID must be a number');
+            throw new CartException('Book ID must be a number');
         else
             $this->bookId = $bookId;
     }
@@ -102,11 +102,11 @@ class Order
     {
         $userId = intval($userId);
         if (is_null($userId))
-            throw new OrderException('Selling User ID can\'t be null');
+            throw new CartException('Selling User ID can\'t be null');
         elseif (empty($userId))
-            throw new OrderException('Selling User ID can\'t be empty');
+            throw new CartException('Selling User ID can\'t be empty');
         elseif (!is_numeric($userId))
-            throw new OrderException('Selling User ID must be a number');
+            throw new CartException('Selling User ID must be a number');
         else
             $this->sellingUserId = $userId;
     }
@@ -115,11 +115,11 @@ class Order
     {
         $userId = intval($userId);
         if (is_null($userId))
-            throw new OrderException('Buying User ID can\'t be null');
+            throw new CartException('Buying User ID can\'t be null');
         elseif (empty($userId))
-            throw new OrderException('Buying User ID can\'t be empty');
+            throw new CartException('Buying User ID can\'t be empty');
         elseif (!is_numeric($userId))
-            throw new OrderException('Buying User ID must be a number');
+            throw new CartException('Buying User ID must be a number');
         else
             $this->buyingUserId = $userId;
     }
@@ -128,11 +128,11 @@ class Order
     {
         $price = intval($price);
         if (is_null($price))
-            throw new OrderException('PricePerPiece can\'t be null');
+            throw new CartException('PricePerPiece can\'t be null');
         elseif (empty($price))
-            throw new OrderException('PricePerPiece can\'t be empty');
+            throw new CartException('PricePerPiece can\'t be empty');
         elseif (!is_numeric($price))
-            throw new OrderException('PricePerPiece Price must be a number');
+            throw new CartException('PricePerPiece Price must be a number');
         else
             $this->pricePerPiece = $price;
     }
@@ -140,11 +140,11 @@ class Order
     public function setPostType($postType)
     {
         if (is_null($postType))
-            throw new OrderException('Post type can\'t be null');
+            throw new CartException('Post type can\'t be null');
         elseif (empty($postType))
-            throw new OrderException('Post type can\'t be empty');
+            throw new CartException('Post type can\'t be empty');
         // elseif ($postType != 'S' || $postType != 'B')
-        //     throw new OrderException('Post type must be either Selling or Buying');
+        //     throw new CartException('Post type must be either Selling or Buying');
         else
             $this->postType = $postType;
     }
@@ -154,40 +154,42 @@ class Order
         if (is_null($bookCount))
             $this->bookCount = null;
         if (empty($bookCount))
-            // throw new OrderException('Books Count can\'t be empty');
+            // throw new CartException('Books Count can\'t be empty');
             $this->bookCount = null;
         elseif (!is_numeric($bookCount))
-            throw new OrderException('Books count must be numeric value');
+            throw new CartException('Books count must be numeric value');
         else
             $this->bookCount = $bookCount;
     }
 
-    public function setOrderWishlist($wishlisted)
+    public function setCartWishlist($wishlisted)
     {
         if (is_null($wishlisted))
             $this->wishlisted = null;
         if (empty($wishlisted))
-            // throw new OrderException('Book wishlist can\'t be empty');
+            // throw new CartException('Book wishlist can\'t be empty');
             $this->wishlisted = null;
         elseif (!is_numeric($wishlisted))
-            throw new OrderException('Book wishlist must be numeric value');
+            throw new CartException('Book wishlist must be numeric value');
         else
             $this->wishlisted = $wishlisted;
     }
 
-    public function setOrderFromRow($row)
+    public function setCartItemFromRow($row)
     {
         $this->setId($row->id);
         $this->setBookId($row->bookId);
         $this->setSellingUserId($row->sellingUserId);
         $this->setBuyingUserId($row->buyingUserId);
+        // $this->setSellingUserId(strval($row->sellingUserId));
+        // $this->setBuyingUserId(strval($row->buyingUserId));
         $this->setPricePerPiece($row->pricePerPiece);
         $this->setBookCount($row->bookCount);
         $this->setPostType($row->postType);
-        $this->setOrderWishlist($row->wishlisted);
+        $this->setCartWishlist($row->wishlisted);
     }
 
-    public function setOrderFromArray($data)
+    public function setCartItemFromArray($data)
     {
         isset($data['id']) ?
             $this->setId($data['id']) : false;
@@ -197,11 +199,11 @@ class Order
         isset($data['pricePerPiece']) ? $this->setPricePerPiece($data['pricePerPiece']) : false;
         isset($data['bookCount']) ? $this->setBookCount($data['bookCount']) : false;
         isset($data['postType']) ? $this->setPostType($data['postType']) : false;
-        isset($data['wishlisted']) ? $this->setOrderWishlist($data['wishlisted']) : false;
+        isset($data['wishlisted']) ? $this->setCartWishlist($data['wishlisted']) : false;
         
     }
 
-    public function returnOrderAsArray()
+    public function returnCartItemAsArray()
     {
         $post = array();
 
@@ -217,12 +219,12 @@ class Order
         return $post;
     }
 
-    private function getOrder($id)
+    private function getCart($id)
     {
         try {
             $this->setId($id);
-            $this->db->query('SELECT * FROM orderItem where id = :orderId');
-            $this->db->bind(':orderId', $this->id);
+            $this->db->query('SELECT * FROM CartItem where id = :CartId');
+            $this->db->bind(':CartId', $this->id);
 
             $row = $this->db->single();
 
@@ -232,11 +234,11 @@ class Order
                 $response = new Response();
                 $response->setHttpStatusCode(404);
                 $response->setSuccess(false);
-                $response->addMessage("Order not found");
+                $response->addMessage("Cart not found");
                 $response->send();
                 exit;
             }
-        } catch (OrderException $ex) {
+        } catch (CartException $ex) {
             $response = new Response();
             $response->setHttpStatusCode(400);
             $response->setSuccess(false);
@@ -244,7 +246,7 @@ class Order
             $response->send();
             exit;
         } catch (PDOException $ex) {
-            error_log("Fun->GetOrder.. :" . $ex, 0);
+            error_log("Fun->GetCart.. :" . $ex, 0);
             $response = new Response();
             $response->setHttpStatusCode(500);
             $response->setSuccess(false);
@@ -254,35 +256,35 @@ class Order
         }
     }
 
-    public function getUserOrders($uid)
+    public function getUserCartItems($uid)
     {
 
         try {
             $this->setBuyingUserId($uid);
             
-            $this->db->query('SELECT * FROM orderItem WHERE buyingUserId = :userId');
+            $this->db->query('SELECT * FROM cartItem WHERE buyingUserId = :userId');
             $this->db->bind(":userId", $this->buyingUserId);
 
             $rows = $this->db->resultset();
 
             if ($this->db->rowCount() > 0) {
 
-                $orderArray = array();
+                $cartArray = array();
 
                 foreach ($rows as $row) {
-                    $this->setOrderFromRow($row);
+                    $this->setCartItemFromRow($row);
 
-                    $orderArray[] = $this->returnOrderAsArray();
+                    $cartArray[] = $this->returnCartItemAsArray();
                 }
 
                 $returnData = array();
                 $returnData['rows_returned'] = $this->db->rowCount();
-                $returnData['orders'] = $orderArray;
+                $returnData['carts'] = $cartArray;
 
                 $response = new Response();
                 $response->setHttpStatusCode(200);
                 $response->setSuccess(true);
-                $response->addMessage('Orders retrieved successfully');
+                $response->addMessage('Carts retrieved successfully');
                 $response->setData($returnData);
                 return $response;
                 // $response->send();
@@ -291,12 +293,11 @@ class Order
                 $response = new Response();
                 $response->setHttpStatusCode(500);
                 $response->setSuccess(false);
-                $response->addMessage('Could\'t retrieve orders, please try again');
+                $response->addMessage('Could\'t retrieve Cart item, please try again');
                 $response->send();
                 exit;
             }
-        } catch (OrderException $ex) {
-            die('here');
+        } catch (CartException $ex) {
             $response = new Response();
             $response->setHttpStatusCode(400);
             $response->setSuccess(false);
@@ -304,7 +305,7 @@ class Order
             $response->send();
             exit;
         } catch (PDOException $ex) {
-            error_log("Fun getUserOrders: " . $ex, 0);
+            error_log("Fun getUserCarts: " . $ex, 0);
             $response = new Response();
             $response->setHttpStatusCode(500);
             $response->setSuccess(false);
@@ -314,32 +315,32 @@ class Order
         }
     }
 
-    public function getOrderById($id)
+    public function getCartItemById($id)
     {
         $id = intval($id);
 
         try {
             $this->setId($id);
 
-            $this->db->query('SELECT * FROM orderItem WHERE id = :orderId');
-            $this->db->bind(':orderId', $this->id);
+            $this->db->query('SELECT * FROM cartItem WHERE id = :CartId');
+            $this->db->bind(':CartId', $this->id);
 
             $row = $this->db->single();
 
             if ($this->db->rowCount() > 0) {
 
-                $this->setOrderFromRow($row);
+                $this->setCartItemFromRow($row);
 
-                $orderArray[] = $this->returnOrderAsArray();
+                $cartArray[] = $this->returnCartItemAsArray();
 
                 $returnData = array();
                 $returnData['rows_returned'] = $this->db->rowCount();
-                $returnData['order'] = $orderArray;
+                $returnData['cart'] = $cartArray;
 
                 $response = new Response();
                 $response->setHttpStatusCode(200);
                 $response->setSuccess(true);
-                $response->addMessage('Order retrievd successfully');
+                $response->addMessage('Cart retrieved successfully');
                 $response->setData($returnData);
                 return $response;
                 // $response->send();
@@ -352,7 +353,7 @@ class Order
                 $response->send();
                 exit;
             }
-        } catch (OrderException $ex) {
+        } catch (CartException $ex) {
             $response = new Response();
             $response->setHttpStatusCode(400);
             $response->setSuccess(false);
@@ -360,7 +361,7 @@ class Order
             $response->send();
             exit;
         } catch (PDOException $ex) {
-            error_log("Fun getOrderById: " . $ex, 0);
+            error_log("Fun getCartById: " . $ex, 0);
             $response = new Response();
             $response->setHttpStatusCode(500);
             $response->setSuccess(false);
@@ -370,32 +371,32 @@ class Order
         }
     }
 
-    public function getAnnonimusOrder()
+    public function getAnnonimusCartItems()
     {
         try {
 
-            $this->db->query('SELECT * FROM orderItem LIMIT 10');
+            $this->db->query('SELECT * FROM cartItem LIMIT 10');
 
             $rows = $this->db->resultset();
 
             if ($this->db->rowCount() > 0) {
 
-                $orderArray = array();
+                $cartArray = array();
 
                 foreach ($rows as $row) {
-                    $this->setOrderFromRow($row);
+                    $this->setCartItemFromRow($row);
 
-                    $orderArray[] = $this->returnOrderAsArray();
+                    $cartArray[] = $this->returnCartItemAsArray();
                 }
 
                 $returnData = array();
                 $returnData['rows_returned'] = $this->db->rowCount();
-                $returnData['orders'] = $orderArray;
+                $returnData['carts'] = $cartArray;
 
                 $response = new Response();
                 $response->setHttpStatusCode(200);
                 $response->setSuccess(true);
-                $response->addMessage('Orders retrievd successfully');
+                $response->addMessage('Cart Items retrievd successfully');
                 $response->setData($returnData);
                 return $response;
                 // $response->send();
@@ -404,11 +405,11 @@ class Order
                 $response = new Response();
                 $response->setHttpStatusCode(500);
                 $response->setSuccess(false);
-                $response->addMessage('Couldn\'t retrieve orders, please try again');
+                $response->addMessage('Couldn\'t retrieve Cart Items, please try again');
                 $response->send();
                 exit;
             }
-        } catch (OrderException $ex) {
+        } catch (CartException $ex) {
             $response = new Response();
             $response->setHttpStatusCode(400);
             $response->setSuccess(false);
@@ -416,7 +417,7 @@ class Order
             $response->send();
             exit;
         } catch (PDOException $ex) {
-            error_log("Fun getAnnonimusOrder: " . $ex, 0);
+            error_log("Fun getAnnonimusCart: " . $ex, 0);
             $response = new Response();
             $response->setHttpStatusCode(500);
             $response->setSuccess(false);
@@ -428,14 +429,14 @@ class Order
 
     
 
-    public function orderExists($uid, $bookId = null)//, $bookName = null)
+    public function CartItemExists($uid, $bookId = null)//, $bookName = null)
     {
         try {
             $this->setBuyingUserId($uid);
             if (!is_null($bookId)) {
 
                 $this->setBookId($bookId);
-                $this->db->query('SELECT COUNT(id) as totalCount FROM orderItem where buyingUserId = :userId AND bookId = :bookId');
+                $this->db->query('SELECT COUNT(id) as totalCount FROM cartItem where buyingUserId = :userId AND bookId = :bookId');
 
                 $this->db->bind(':userId', $this->buyingUserId);
                 $this->db->bind(':bookId', $this->bookId);
@@ -461,7 +462,7 @@ class Order
                 return true;
 
             return false;
-        } catch (OrderException $ex) {
+        } catch (CartException $ex) {
             $response = new Response();
             $response->setHttpStatusCode(400);
             $response->setSuccess(false);
@@ -469,7 +470,7 @@ class Order
             $response->send();
             exit;
         } catch (PDOException $ex) {
-            error_log("Fun OrderExists: " . $ex, 0);
+            error_log("Fun CartExists: " . $ex, 0);
             $response = new Response();
             $response->setHttpStatusCode(500);
             $response->setSuccess(false);
@@ -479,12 +480,12 @@ class Order
         }
     }
 
-    public function orderExistsCheck($id)
+    public function CartItemExistsCheck($id)
     {
         try {
             $this->setId($id);
             
-            $this->db->query('SELECT COUNT(id) as totalCount FROM orderItem where id = :id');
+            $this->db->query('SELECT COUNT(id) as totalCount FROM cartItem where id = :id');
 
             $this->db->bind(':id', $this->id);
 
@@ -502,7 +503,7 @@ class Order
                 return true;
 
             return false;
-        } catch (OrderException $ex) {
+        } catch (CartException $ex) {
             $response = new Response();
             $response->setHttpStatusCode(400);
             $response->setSuccess(false);
@@ -510,7 +511,7 @@ class Order
             $response->send();
             exit;
         } catch (PDOException $ex) {
-            error_log("Fun OrderExists: " . $ex, 0);
+            error_log("Fun CartExists: " . $ex, 0);
             $response = new Response();
             $response->setHttpStatusCode(500);
             $response->setSuccess(false);
@@ -520,8 +521,8 @@ class Order
         }
     }
 
-    // public function createOrder($uid, $data)
-    public function createOrder($uid, $data)
+    // public function createCart($uid, $data)
+    public function createCartItem($uid, $data)
     {
         $uid = intval($uid);
 
@@ -529,19 +530,19 @@ class Order
             // $this->setUserId($uid);
             $this->setBuyingUserId($uid);
             // $data['postedOn'] = date("Y-m-d H:i:s");
-            $this->setOrderFromArray($data);
+            $this->setCartItemFromArray($data);
 
-            // if ($this->orderExists($this->userId, null, $this->bookName)) {
-                if ($this->orderExists($this->buyingUserId, $this->bookId, null)) {
+            // if ($this->CartExists($this->userId, null, $this->bookName)) {
+                if ($this->CartItemExists($this->buyingUserId, $this->bookId, null)) {
                 $response = new Response();
                 $response->setHttpStatusCode(400);
                 $response->setSuccess(false);
-                $response->addMessage("Order already Posted");
+                $response->addMessage("Cart Item already Posted");
                 $response->send();
                 exit;
             }
 
-            $this->db->query('INSERT INTO orderItem (id, bookId, sellingUserId, buyingUserId, pricePerPiece, bookCount, wishlisted, postType, postedOn) VALUES (null, :bookId, :sellingUserId, :buyingUserId, :pricePerPiece, :bookCount, :wishlisted, :postType, null)');
+            $this->db->query('INSERT INTO cartItem (id, bookId, sellingUserId, buyingUserId, pricePerPiece, bookCount, wishlisted, postType, postedOn) VALUES (null, :bookId, :sellingUserId, :buyingUserId, :pricePerPiece, :bookCount, :wishlisted, :postType, null)');
 
             $this->db->bind(':bookId', $this->bookId);
             $this->db->bind(':sellingUserId', $this->sellingUserId);
@@ -559,13 +560,13 @@ class Order
                     $response = new Response();
                     $response->setHttpStatusCode(500);
                     $response->setSuccess(false);
-                    $response->addMessage("Couldn't fetch order data after creating new order");
+                    $response->addMessage("Couldn't fetch Cart data after creating new Cart");
                     $response->send();
                     exit;
                 }
 
-                $this->db->query('SELECT * FROM  orderItem where id = :orderId');
-                $this->db->bind(":orderId", $this->id);
+                $this->db->query('SELECT * FROM  cartItem where id = :cartId');
+                $this->db->bind(":cartId", $this->id);
 
                 $row = $this->db->single();
 
@@ -573,25 +574,25 @@ class Order
                     $response = new Response();
                     $response->setHttpStatusCode(500);
                     $response->setSuccess(false);
-                    $response->addMessage("Couldn't get order information data after creating new order");
+                    $response->addMessage("Couldn't get Cart information data after creating new Cart");
                     $response->send();
                     exit;
                 }
 
-                $this->setOrderFromRow($row);
+                $this->setCartItemFromRow($row);
 
                 $userArray = array();
 
-                $userArray[] = $this->returnOrderAsArray();
+                $userArray[] = $this->returnCartItemAsArray();
 
                 $returnData = array();
                 $returnData['rows_returned'] = $this->db->rowCount();
-                $returnData['order'] = $userArray;
+                $returnData['cart'] = $userArray;
 
                 $response = new Response();
                 $response->setHttpStatusCode(201);
                 $response->setSuccess(true);
-                $response->addMessage("Order Placed Successfully");
+                $response->addMessage("Cart Item created Successfully");
                 $response->setData($returnData);
                 return $response;
                 // $response->send();
@@ -600,11 +601,11 @@ class Order
                 $response = new Response();
                 $response->setHttpStatusCode(500);
                 $response->setSuccess(false);
-                $response->addMessage("Error placing order, please try again");
+                $response->addMessage("Error creating cart item, please try again");
                 $response->send();
                 exit;
             }
-        } catch (OrderException $ex) {
+        } catch (CartException $ex) {
             $response = new Response();
             $response->setHttpStatusCode(400);
             $response->setSuccess(false);
@@ -612,7 +613,7 @@ class Order
             $response->send();
             exit;
         } catch (PDOException $ex) {
-            error_log("Fun createOrder: " . $ex, 0);
+            error_log("Fun createCart: " . $ex, 0);
             $response = new Response();
             $response->setHttpStatusCode(500);
             $response->setSuccess(false);
@@ -622,20 +623,20 @@ class Order
         }
     }
 
-    public function updateOrder($id, $data)
+    public function updateCartItem($id, $data)
     {
         try {
             $data['buyingUserId'] = intval($data['buyingUserId']);
             $this->setBuyingUserId($data['buyingUserId']);
             $this->setId($id);
 
-            $this->setOrderFromArray($data);
+            $this->setCartItemFromArray($data);
 
-            if (!$this->orderExists($this->buyingUserId, $this->bookId)) {
+            if (!$this->CartItemExists($this->buyingUserId, $this->bookId)) {
                 $response = new Response();
                 $response->setHttpStatusCode(404);
                 $response->setSuccess(false);
-                $response->addMessage("Couldn't find the order to update");
+                $response->addMessage("Couldn't find the cart item to update");
                 $response->send();
                 exit;
             }
@@ -649,12 +650,12 @@ class Order
 
             $queryFields = "";
 
-            $this->db->query('SELECT * FROM orderItem where id = :orderId');
-            $this->db->bind(":orderId", $this->id);
+            $this->db->query('SELECT * FROM cartItem where id = :cartId');
+            $this->db->bind(":cartId", $this->id);
 
             $row = $this->db->single();
 
-            $this->setOrderFromRow($row);
+            $this->setCartItemFromRow($row);
 
             if (array_key_exists('sellingUserId', $data)) {
                 if ((strcmp($data["sellingUserId"], $this->sellingUserId)) != 0) {
@@ -691,7 +692,7 @@ class Order
             if (array_key_exists('wishlisted', $data)) {
                 if ((strcmp($data["wishlisted"], $this->wishlisted)) != 0) {
                     $wishlistedUpdated = true;
-                    $this->setOrderWishlist($data['wishlisted']);
+                    $this->setCartWishlist($data['wishlisted']);
                     $queryFields .= "wishlisted = :wishlisted, ";
                 }
             }
@@ -715,8 +716,8 @@ class Order
                 exit;
             }
 
-            $this->db->query("UPDATE orderItem SET " . $queryFields . " WHERE id = :orderId");
-            $this->db->bind(':orderId', $this->id);
+            $this->db->query("UPDATE cartItem SET " . $queryFields . " WHERE id = :cartId");
+            $this->db->bind(':cartId', $this->id);
 
             if($sellingUserIdUpdated)
                 $this->db->bind(":sellingUserId", $this->sellingUserId);
@@ -743,22 +744,22 @@ class Order
 
             if ($this->db->rowCount() > 0) {
 
-                $row = $this->getOrder($this->id);
+                $row = $this->getCart($this->id);
 
-                $this->setOrderFromRow($row);
+                $this->setCartItemFromRow($row);
 
-                $orderArray = array();
-                $orderArray[] = $this->returnOrderAsArray();
+                $cartArray = array();
+                $cartArray[] = $this->returnCartItemAsArray();
 
                 $returnData = array();
 
                 $returnData["rows_returned"] = $this->db->rowCount();
-                $returnData["orders"] = $orderArray;
+                $returnData["carts"] = $cartArray;
 
                 $response = new Response();
                 $response->setHttpStatusCode(200);
                 $response->setSuccess(true);
-                $response->addMessage("Order Information Updated successfully");
+                $response->addMessage("Cart Item Information Updated successfully");
                 $response->setData($returnData);
                 return $response;
                 // $response->send();
@@ -772,7 +773,7 @@ class Order
                 $response->send();
                 exit;
             }
-        } catch (OrderException $ex) {
+        } catch (CartException $ex) {
             $response = new Response();
             $response->setHttpStatusCode(400);
             $response->setSuccess(false);
@@ -780,7 +781,7 @@ class Order
             $response->send();
             exit;
         } catch (PDOException $ex) {
-            error_log("Fun updateOrder: " . $ex, 0);
+            error_log("Fun updateCart: " . $ex, 0);
             $response = new Response();
             $response->setHttpStatusCode(500);
             $response->setSuccess(false);
@@ -790,7 +791,7 @@ class Order
         }
     }
 
-    public function deleteOrder($id, $uid)
+    public function deleteCartItem($id, $uid)
     {
         $id = intval($id);
         $uid = intval($uid);
@@ -798,26 +799,26 @@ class Order
             $this->setId($id);
             $this->setBuyingUserId($uid);
 
-            // if (!$this->orderExists($this->buyingUserId, null)) {
-                if (!$this->orderExistsCheck($this->id)) {
+            // if (!$this->CartExists($this->buyingUserId, null)) {
+                if (!$this->CartItemExistsCheck($this->id)) {
                 $response = new Response();
                 $response->setHttpStatusCode(404);
                 $response->setSuccess(false);
-                $response->addMessage("Couldn't find the order to delete");
+                $response->addMessage("Couldn't find the Cart Item to delete");
                 $response->send();
                 exit;
             }
 
-            // $this->db->query('DELETE FROM orderItem WHERE id = :orderId AND userId = :userId');
-            $this->db->query('DELETE FROM orderItem WHERE id = :orderId AND buyingUserId = :userId');
-            $this->db->bind(':orderId', $this->id);
+            // $this->db->query('DELETE FROM CartItem WHERE id = :CartId AND userId = :userId');
+            $this->db->query('DELETE FROM cartItem WHERE id = :cartId AND buyingUserId = :userId');
+            $this->db->bind(':cartId', $this->id);
             $this->db->bind(':userId', $this->buyingUserId);
 
             if ($this->db->execute()) {
                 $response = new Response();
                 $response->setHttpStatusCode(200);
                 $response->setSuccess(true);
-                $response->addMessage("Order Deleted Successfully");
+                $response->addMessage("Cart Item Deleted Successfully");
                 return $response;
                 // $response->send();
                 // exit;
@@ -825,11 +826,11 @@ class Order
                 $response = new Response();
                 $response->setHttpStatusCode(500);
                 $response->setSuccess(false);
-                $response->addMessage("Couldn't delete the order");
+                $response->addMessage("Couldn't delete the Cart Item");
                 $response->send();
                 exit;
             }
-        } catch (OrderException $ex) {
+        } catch (CartException $ex) {
             $response = new Response();
             $response->setHttpStatusCode(400);
             $response->setSuccess(false);
@@ -837,7 +838,7 @@ class Order
             $response->send();
             exit;
         } catch (PDOException $ex) {
-            error_log("Fun deleteOrder: " . $ex, 0);
+            error_log("Fun deleteCart: " . $ex, 0);
             $response = new Response();
             $response->setHttpStatusCode(500);
             $response->setSuccess(false);

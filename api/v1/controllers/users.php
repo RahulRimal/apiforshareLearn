@@ -62,18 +62,36 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         exit;
     }
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (isset($_SERVER['CONTENT_TYPE'])) {
-        if ($_SERVER['CONTENT_TYPE'] != 'application/json') {
-            $response = new Response();
-            $response->setHttpStatusCode(400);
-            $response->setSuccess(false);
-            $response->addMessage("Header type not set to JSON");
-            $response->send();
-            exit;
+
+    if (isset($_GET['userPic'])) {
+        $uId = $_GET['userPic'];
+        $user = new User('tempUser', 'tempPass', null, 'tempFirst', 'tempLast', null, null, null);
+
+        $receivedData = array();
+        if(isset($_FILES['picture']))
+        {
+            $receivedData['picture'] = $_FILES['picture'];
+
+            $response = $user->updateInfo($uId, $receivedData);
+        $response->send();
+        exit;
         }
+        // die(var_dump($receivedData));
+
+        
     }
 
-    if (!isset($_SERVER['CONTENT_TYPE'])) {
+
+    sleep(1);
+
+    if (isset($_SERVER['CONTENT_TYPE']) &&
+    (
+        ($_SERVER['CONTENT_TYPE'] != 'application/json')
+    &&
+    ($_SERVER['CONTENT_TYPE'] != 'application/json; charset=utf-8')
+    // ||
+    // ($_SERVER['CONTENT_TYPE'] != 'application/json; charset=utf-8')
+    )) {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
@@ -81,7 +99,6 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $response->send();
         exit;
     }
-
 
     $rawData = file_get_contents('php://input');
 
@@ -107,7 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     }
 
     try {
-        $newUser = new User($jsonData->username, $jsonData->password, isset($jsonData->email) ? $jsonData->email : null, $jsonData->firstName, $jsonData->lastName, isset($jsonData->class) ? $jsonData->class : null, isset($jsonData->description) ? $jsonData->description : null, isset($jsonData->followers) ? $jsonData->followers : null);
+        $newUser = new User($jsonData->username, $jsonData->password, isset($jsonData->email) ? $jsonData->email : null, $jsonData->firstName, $jsonData->lastName, isset($jsonData->class) ? $jsonData->class : null, isset($jsonData->description) ? $jsonData->description : null, isset($jsonData->followers) ? $jsonData->followers : null, isset($jsonData->picture) ? $jsonData->picture : null);
 
         $response = $newUser->createNewUser();
         $response->send();
@@ -121,28 +138,26 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         exit;
     }
 } elseif ($_SERVER['REQUEST_METHOD'] == 'PATCH') {
+    sleep(1);
 
-    if (isset($_SERVER['CONTENT_TYPE'])) {
-        if ($_SERVER['CONTENT_TYPE'] != 'application/json') {
-            $response = new Response();
-            $response->setHttpStatusCode(400);
-            $response->setSuccess(false);
-            $response->addMessage("Header type not set to JSON");
-            $response->send();
-            exit;
-        }
-    }
-
-    if (!isset($_SERVER['CONTENT_TYPE'])) {
-        $response = new Response();
-        $response->setHttpStatusCode(400);
-        $response->setSuccess(false);
-        $response->addMessage("Header type not set to JSON");
-        $response->send();
-        exit;
-    }
+    // if (isset($_SERVER['CONTENT_TYPE']) &&
+    // (
+    //     ($_SERVER['CONTENT_TYPE'] != 'multipart/form-data')
+    // &&
+    // ($_SERVER['CONTENT_TYPE'] != 'multipart/form-data')
+    // )) 
+    // // if(isset($_SERVER['CONTENT_TYPE']) && ($_SERVER['CONTENT_TYPE'] != 'multipart/form-data'))
+    // {
+    //     $response = new Response();
+    //     $response->setHttpStatusCode(400);
+    //     $response->setSuccess(false);
+    //     $response->addMessage("Header type not set to Multipart/form-data");
+    //     $response->send();
+    //     exit;
+    // }
 
     $rawData = file_get_contents('php://input');
+
 
     if (!$jsonData = json_decode($rawData)) {
         $response = new Response();
@@ -152,6 +167,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $response->send();
         exit;
     }
+
+    $pic = base64_decode($jsonData->picture);
+
+    // die(var_dump($pic));
+
+    // if (!$jsonData = json_decode($rawData)) {
+    //     $response = new Response();
+    //     $response->setHttpStatusCode(400);
+    //     $response->setSuccess(false);
+    //     $response->addMessage("Invalid JSON body");
+    //     $response->send();
+    //     exit;
+    // }
 
     if (isset($_GET['user'])) {
         $uId = $_GET['user'];
@@ -176,6 +204,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
             isset($jsonData->lastName) ? $receivedData['lastName'] = $jsonData->lastName : false;
             isset($jsonData->class) ? $receivedData['class'] = $jsonData->class : false;
             isset($jsonData->description) ? $receivedData['description'] = $jsonData->description : false;
+            isset($jsonData->picture) ? $receivedData['picture'] = $jsonData->picture : false;
             $response = $user->updateInfo($uId, $receivedData);
             $response->send();
             exit;

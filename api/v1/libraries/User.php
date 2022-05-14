@@ -201,9 +201,9 @@ class User
     public function setPicture($picture)
     {
         if (!is_null($picture)) {
-            if (strlen($picture) > 255)
-                throw new UserException('Picture too long');
-            else
+            // if (strlen($picture) > 255)
+            //     throw new UserException('Picture too long');
+            // else
                 $this->picture = $picture;
                 // $this->picture =  BASE_URI . 'images/profile-pics/'. $this->getFristName() .'/'. $picture;
         } else
@@ -418,20 +418,103 @@ class User
         }
     }
 
+
+	public function uploadpicture(){
+		$allowedExts = array("gif", "jpeg", "jpg", "png");
+        // $temp = explode(".", $this->getPicture()["picture"]["name"]);
+        $temp = explode(".", $this->getPicture()["name"]);
+        // die(BASE_URI);
+        // die(var_dump($this->getPicture()['tmp_name']));
+		// $temp = explode(".", $_FILES["picture"]["name"]);
+		$extension = end($temp);
+		if ((
+                   ($this->getPicture()["type"] == "image/gif")
+				|| ($this->getPicture()["type"] == "image/jpeg")
+				|| ($this->getPicture()["type"] == "image/jpg")
+				|| ($this->getPicture()["type"] == "image/pjpeg")
+				|| ($this->getPicture()["type"] == "image/x-png")
+				|| ($this->getPicture()["type"] == "image/png"))
+				&& ($_FILES["picture"]["size"] < 100000000)
+				&& in_array($extension, $allowedExts)) {
+			if ($_FILES["picture"]["error"] > 0) {
+				// redirect('register.php', $_FILES["picture"]["error"], 'error');
+                $response = new Response();
+                $response->setHttpStatusCode(500);
+                $response->setSuccess(false);
+                $response->addMessage("Error on uploading picture");
+                $response->send();
+                exit;
+			} else {
+                // die(echo(BASE_URI ."/images/profile-pics"));
+				if (file_exists(BASE_URI ."images/profile-pics/" . $this->getUsername(). "/". $this->getPicture()["name"])) {
+					// redirect('register.php', 'File already exists', 'error');
+                    $response = new Response();
+                $response->setHttpStatusCode(500);
+                $response->setSuccess(false);
+                $response->addMessage("picture already uploaded");
+                $response->send();
+                exit;
+				} else {
+                    move_uploaded_file($this->getPicture()["tmp_name"], ('../../../images/profile-pics/'. $this->getUsername(). "/". $this->getPicture()["name"]));
+
+					return true;
+				}
+			}
+		} else {
+			// redirect('register.php', 'Invalid File Type!', 'error');
+            $response = new Response();
+                $response->setHttpStatusCode(500);
+                $response->setSuccess(false);
+                $response->addMessage("Invalid picture file type");
+                $response->send();
+                exit;
+		}
+	}
+
+
     public function createNewUser()
     {
         if (!$this->userExists($this->username)) {
             try {
-                $this->db->query('INSERT INTO user(id, username, password, email, firstName, lastName, picture, class, description, followers, userCreatedDate) values (null, :username, :password, :email, :firstName, :lastName, null, :class, :description, :followers, null)');
+                
+                // if($this->uploadpicture()){
+                //     $this->db->query('INSERT INTO user(id, username, password, email, firstName, lastName, picture, class, description, followers, userCreatedDate) values (null, :username, :password, :email, :firstName, :lastName, :picture, :class, :description, :followers, null)');
+                //     $this->db->bind(':username', $this->username);
+                //     $this->db->bind(':password', $this->password);
+                //     $this->db->bind(':email', $this->email);
+                //     $this->db->bind(':firstName', $this->firstName);
+                //     $this->db->bind(':lastName', $this->lastName);
+                //     $this->db->bind(':picture', $this->picture['picture']['name']);
+                //     $this->db->bind(':class', $this->class);
+                //     $this->db->bind(':description', $this->description);
+                //     $this->db->bind(':followers', $this->followers);
+                // }
+                // else
+                // {
+                //     // $this->db->query('INSERT INTO user(id, username, password, email, firstName, lastName, picture, class, description, followers, userCreatedDate) values (null, :username, :password, :email, :firstName, :lastName, null, :class, :description, :followers, null)');
+                //     $this->db->query('INSERT INTO user(id, username, password, email, firstName, lastName, picture, class, description, followers, userCreatedDate) values (null, :username, :password, :email, :firstName, :lastName, :picture, :class, :description, :followers, null)');
+                //     $this->db->bind(':username', $this->username);
+                //     $this->db->bind(':password', $this->password);
+                //     $this->db->bind(':email', $this->email);
+                //     $this->db->bind(':firstName', $this->firstName);
+                //     $this->db->bind(':lastName', $this->lastName);
+                //     $this->db->bind(':picture', 'no-image.png');
+                //     $this->db->bind(':class', $this->class);
+                //     $this->db->bind(':description', $this->description);
+                //     $this->db->bind(':followers', $this->followers);
+                // }
 
-                $this->db->bind(':username', $this->username);
-                $this->db->bind(':password', $this->password);
-                $this->db->bind(':email', $this->email);
-                $this->db->bind(':firstName', $this->firstName);
-                $this->db->bind(':lastName', $this->lastName);
-                $this->db->bind(':class', $this->class);
-                $this->db->bind(':description', $this->description);
-                $this->db->bind(':followers', $this->followers);
+                $this->db->query('INSERT INTO user(id, username, password, email, firstName, lastName, picture, class, description, followers, userCreatedDate) values (null, :username, :password, :email, :firstName, :lastName, :picture, :class, :description, :followers, null)');
+
+                    $this->db->bind(':username', $this->username);
+                    $this->db->bind(':password', $this->password);
+                    $this->db->bind(':email', $this->email);
+                    $this->db->bind(':firstName', $this->firstName);
+                    $this->db->bind(':lastName', $this->lastName);
+                    $this->db->bind(':picture', 'no-image.png');
+                    $this->db->bind(':class', $this->class);
+                    $this->db->bind(':description', $this->description);
+                    $this->db->bind(':followers', $this->followers);
 
                 if ($this->db->execute()) {
                     $uId = $this->db->lastInsertId();
@@ -485,6 +568,7 @@ class User
                     $response->send();
                     exit;
                 }
+
             } catch (PDOException $ex) {
                 error_log("Fun->CreateNewUser :" . $ex, 0);
                 $response = new Response();
@@ -504,6 +588,95 @@ class User
         }
     }
 
+    // public function createNewUser()
+    // {
+    //     if (!$this->userExists($this->username)) {
+    //         try {
+
+    //             $this->db->query('INSERT INTO user(id, username, password, email, firstName, lastName, picture, class, description, followers, userCreatedDate) values (null, :username, :password, :email, :firstName, :lastName, null, :class, :description, :followers, null)');
+
+    //             $this->db->bind(':username', $this->username);
+    //             $this->db->bind(':password', $this->password);
+    //             $this->db->bind(':email', $this->email);
+    //             $this->db->bind(':firstName', $this->firstName);
+    //             $this->db->bind(':lastName', $this->lastName);
+    //             $this->db->bind(':class', $this->class);
+    //             $this->db->bind(':description', $this->description);
+    //             $this->db->bind(':followers', $this->followers);
+
+    //             if ($this->db->execute()) {
+    //                 $uId = $this->db->lastInsertId();
+
+    //                 if (is_null($uId)) {
+    //                     $response = new Response();
+    //                     $response->setHttpStatusCode(500);
+    //                     $response->setSuccess(false);
+    //                     $response->addMessage("Couldn't get user data after Creating new User");
+    //                     $response->send();
+    //                     exit;
+    //                 }
+
+    //                 $this->db->query('SELECT * FROM  user where id = :userId');
+    //                 $this->db->bind(':userId', $uId);
+
+    //                 $row = $this->db->single();
+
+    //                 if ($this->db->rowCount() < 1) {
+    //                     $response = new Response();
+    //                     $response->setHttpStatusCode(500);
+    //                     $response->setSuccess(false);
+    //                     $response->addMessage("Couldn't get user data after Creating new User");
+    //                     $response->send();
+    //                     exit;
+    //                 }
+
+    //                 $this->setUserFromRow($row);
+
+    //                 $userArray = array();
+
+    //                 $userArray[] = $this->returnUserAsArray();
+
+    //                 $returnData = array();
+    //                 $returnData['rows_returned'] = $this->db->rowCount();
+    //                 $returnData['users'] = $userArray;
+
+    //                 $response = new Response();
+    //                 $response->setHttpStatusCode(201);
+    //                 $response->setSuccess(true);
+    //                 $response->addMessage("User Created Successfully");
+    //                 $response->setData($returnData);
+    //                 // $response->send();
+    //                 return $response;
+    //                 exit;
+    //             } else {
+    //                 $response = new Response();
+    //                 $response->setHttpStatusCode(500);
+    //                 $response->setSuccess(false);
+    //                 $response->addMessage("Error creating new user, please try again");
+    //                 $response->send();
+    //                 exit;
+    //             }
+    //         } catch (PDOException $ex) {
+    //             error_log("Fun->CreateNewUser :" . $ex, 0);
+    //             $response = new Response();
+    //             $response->setHttpStatusCode(500);
+    //             $response->setSuccess(false);
+    //             $response->addMessage("Error creating new user");
+    //             $response->send();
+    //             exit;
+    //         }
+    //     } else {
+    //         $response = new Response();
+    //         $response->setHttpStatusCode(409);
+    //         $response->setSuccess(false);
+    //         $response->addMessage("User already exists");
+    //         $response->send();
+    //         exit;
+    //     }
+    // }
+
+
+
 
     public function updateInfo($uid, $data)
     {
@@ -516,6 +689,7 @@ class User
         $lastNameUpdated = false;
         $classUpdated = false;
         $descriptionUpdated = false;
+        $pictureUpdated = false;
 
         $queryFields = "";
 
@@ -558,6 +732,7 @@ class User
                         $queryFields .= "firstName = :firstName, ";
                     }
                 }
+
                 if (array_key_exists('lastName', $data)) {
                     if ((strcmp($data['lastName'], $this->lastName)) != 0) {
                         $lastNameUpdated = true;
@@ -579,6 +754,7 @@ class User
                         $queryFields .= "class = :class, ";
                     }
                 }
+                
                 if (array_key_exists('description', $data)) {
                     if (!is_null($this->description)) {
                         if ((strcmp($data['description'], $this->description)) != 0) {
@@ -593,9 +769,26 @@ class User
                     }
                 }
 
+                if (array_key_exists('picture', $data)) {
+                    if (!is_null($this->picture)) {
+                        // if ((strcmp($data['picture'], $this->picture)) != 0) {
+                            // if ((strcmp($data['picture']['name'], $this->picture['name'])) != 0) {
+                            $pictureUpdated = true;
+                            $this->setPicture($data['picture']);
+                            $this->uploadpicture();
+                            $queryFields .= "picture = :picture, ";
+                        // }
+                    }
+                    // else {
+                        $pictureUpdated = true;
+                        $this->setPicture($data['picture']);
+                        $queryFields .= "picture = :picture, ";
+                    // }
+                }
+
                 $queryFields = rtrim($queryFields, ", ");
 
-                if (!$passwordUpdated && !$emailUpdated && !$firstNameUpdated && !$lastNameUpdated && !$classUpdated && !$descriptionUpdated) {
+                if (!$passwordUpdated && !$emailUpdated && !$firstNameUpdated && !$lastNameUpdated && !$classUpdated && !$pictureUpdated && !$descriptionUpdated) {
                     $response = new Response();
                     $response->setHttpStatusCode(400);
                     $response->setSuccess(false);
@@ -624,6 +817,9 @@ class User
 
                 if ($classUpdated)
                     $this->db->bind(":class", $this->class);
+
+                if ($pictureUpdated)
+                    $this->db->bind(":picture", $this->getPicture()['name']);
 
                 if ($descriptionUpdated)
                     $this->db->bind(":description", $this->description);

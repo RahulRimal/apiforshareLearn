@@ -10,3 +10,4 @@ define("SITE_TITLE", "Share Your Learning");
 //Paths
 // define ('BASE_URI', 'http://'.$_SERVER['SERVER_NAME'].'/apiforshareLearn/');
 define ('BASE_URI', 'http://'.$_SERVER['SERVER_NAME'].'/sabaikoBooks/');
+// define ('BASE_FOLDER', ''.$_SERVER['SERVER_NAME'].'/apiforshareLearn/');

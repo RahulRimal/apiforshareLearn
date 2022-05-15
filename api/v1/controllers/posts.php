@@ -71,6 +71,48 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
     sleep(1);
 
+    if (isset($_GET['postPictures'])) {
+        $pId = $_GET['postPictures'];
+        
+        $post = new Post();
+
+        $picCount = 1;
+
+        $receivedData = array();
+
+        foreach ($_FILES as $file) {
+
+            $receivedData['pic'. strval($picCount)] = $file;
+            $picCount++;
+        }
+
+        $pictureArray = array();
+
+        $pictureArray['pictures'] = $receivedData;
+
+
+        if(isset($_FILES))
+        {
+            $response = $post->updatePostImages($pId, $pictureArray);
+            $response->send();
+            exit;
+        }
+        
+
+        // if(isset($_FILES['picture']))
+        // {
+        //     $receivedData['picture'] = $_FILES['picture'];
+
+        //     $response = $user->updateInfo($uId, $receivedData);
+        // $response->send();
+        // exit;
+        // }
+
+        
+    }
+
+
+
     if (isset($_SERVER['CONTENT_TYPE']) &&
     (
         ($_SERVER['CONTENT_TYPE'] != 'application/json')

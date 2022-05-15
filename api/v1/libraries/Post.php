@@ -17,6 +17,7 @@ class Post
     private $price;
     private $bookCount;
     private $wishlisted;
+    private $pictures;
     private $postType;
     private $postRating;
     private $postedOn;
@@ -80,6 +81,25 @@ class Post
     public function getWishlisted()
     {
         return $this->wishlisted;
+    }
+
+    public function getPictures()
+    {
+        return $this->pictures;
+    }
+
+    public function getPicturesInString($pictures)
+    {
+        // die(gettype($pictures));
+
+        $picturesInString = "";
+
+        foreach($pictures as $key => $value) {
+            $picturesInString .= $value['name'] . ',';
+        } 
+        $picturesInString = chop($picturesInString, ',');
+
+        return $picturesInString;
     }
 
     public function getPostType()
@@ -205,6 +225,25 @@ class Post
             $this->bookCount = $bookCount;
     }
 
+    public function setPictures($pictures)
+    {
+        if (is_null($pictures))
+            $this->pictures = null;
+        if (empty($pictures))
+            // throw new PostException('Pictures can\'t be empty');
+            $this->pictures = null;
+        
+        if(!is_array($pictures))
+        {
+            $pictureArray = explode(',', $pictures);
+            $this->pictures = $pictureArray;
+        }
+
+        else
+            $this->pictures = $pictures;
+    }
+
+
     public function setBookWishlist($wishlisted)
     {
         if (is_null($wishlisted))
@@ -254,6 +293,7 @@ class Post
         $this->setPrice($row->price);
         $this->setBookCount($row->bookCount);
         $this->setBookWishlist($row->wishlisted);
+        $this->setPictures($row->pictures);
         $this->setPostType($row->postType);
         $this->setPostRating($row->postRating);
         $this->setPostedOn($row->postedOn);
@@ -269,6 +309,7 @@ class Post
         isset($data['price']) ? $this->setPrice($data['price']) : false;
         isset($data['wishlisted']) ? $this->setBookWishlist($data['wishlisted']) : false;
         isset($data['bookCount']) ? $this->setBookCount($data['bookCount']) : false;
+        isset($data['pictures']) ? $this->setPictures($data['pictures']) : false;
         isset($data['postType']) ? $this->setPostType($data['postType']) : false;
         isset($data['postRating']) ? $this->setPostRating($data['postRating']) : $this->setPostRating(null);
         isset($data['postedOn']) ? $this->setPostedOn($data['postedOn']) : false;
@@ -286,6 +327,7 @@ class Post
         $post['boughtDate'] = $this->boughtDate;
         $post['price'] = $this->price;
         $post['bookCount'] = $this->bookCount;
+        $post['pictures'] = $this->pictures;
         $post['wishlisted'] = $this->wishlisted;
         $post['postType'] = $this->postType;
         $post['postRating'] = $this->postRating;
@@ -382,6 +424,80 @@ class Post
             exit;
         }
     }
+
+
+
+    public function uploadPictures(){
+		$allowedExts = array("gif", "jpeg", "jpg", "png");
+
+        $picCount = 1;
+
+        // die(gettype($this->getPictures()));
+        foreach($this->getPictures() as $picture )
+        {
+            $temp = explode(".", $picture["name"]);
+            $extension = end($temp);
+
+            // die(var_dump($extension));
+
+            // die(var_dump($picture["type"]));
+
+            if ((($picture["type"] == "image/gif")
+                    || ($picture["type"] == "image/jpeg")
+                    || ($picture["type"] == "image/jpg")
+                    || ($picture["type"] == "image/pjpeg")
+                    || ($picture["type"] == "image/x-png")
+                    || ($picture["type"] == "application/octet-stream")
+                    || ($picture["type"] == "image/png"))
+                && ($picture["size"] < 200000000)
+                && in_array($extension, $allowedExts)) {
+
+                if ($picture["error"] > 0) {
+                    $response = new Response();
+                    $response->setHttpStatusCode(400);
+                    $response->setSuccess(false);
+                    $response->addMessage("Error uploading picture");
+                    $response->send();
+                    exit;
+                } else {
+                    
+                    if (file_exists(BASE_URI ."images/posts/" . $this->getId(). "/". $picture["name"])) {
+                        // redirect('register.php', 'File already exists', 'error');
+                        $response = new Response();
+                    $response->setHttpStatusCode(500);
+                    $response->setSuccess(false);
+                    $response->addMessage("picture already uploaded");
+                    // $response->send();
+                    // exit;
+                    } else {
+                        move_uploaded_file($picture["tmp_name"], ('../../../images/posts/'. $this->getId(). "/". $picture["name"]));
+                        // return true;
+                    }
+                }
+            }
+            else {
+                // redirect('register.php', 'Invalid File Type!', 'error');
+                $response = new Response();
+                    $response->setHttpStatusCode(500);
+                    $response->setSuccess(false);
+                    $response->addMessage("Invalid picture file type");
+                    $response->send();
+                    exit;
+            }
+
+            $picCount++;
+	}
+
+    // $response = new Response();
+    //                 $response->setHttpStatusCode(200);
+    //                 $response->setSuccess(false);
+    //                 $response->addMessage("Pictures updated successfully");
+    //                 $response->send();
+    //                 exit;
+
+    }
+
+
 
     public function getPostById($id)
     {
@@ -495,6 +611,40 @@ class Post
         }
     }
 
+
+    public function checkPostExistsById($pId)
+    {
+        try {
+            $this->setId($pId);
+
+            $this->db->query('SELECT * FROM post WHERE id = :postId');
+            $this->db->bind(':postId', $this->id);
+
+            $row = $this->db->single();
+
+            if ($this->db->rowCount() > 0) {
+                return true;
+            } else {
+                return false;
+            }
+        }catch(PostException $ex)
+        {
+            $response = new Response();
+            $response->setHttpStatusCode(400);
+            $response->setSuccess(false);
+            $response->addMessage($ex->getMessage());
+            $response->send();
+            exit;
+        } catch (PDOException $ex) {
+            error_log("Fun checkPostExistsById: " . $ex, 0);
+            $response = new Response();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage("Database Error");
+            $response->send();
+            exit;
+        }
+    }
     
 
     public function postExists($uid, $bookId = null, $bookName = null)
@@ -647,6 +797,125 @@ class Post
             exit;
         }
     }
+    
+
+    public function updatePostImages($id, $data)
+    {
+        try {
+            $this->setId($id);
+
+            // $this->setPostFromArray($data);
+
+            // if (!$this->postExists($this->userId, $this->id)) {
+                if (!$this->checkPostExistsById($this->id)) {
+                $response = new Response();
+                $response->setHttpStatusCode(404);
+                $response->setSuccess(false);
+                $response->addMessage("Couldn't find the post to update");
+                $response->send();
+                exit;
+            }
+
+            $this->setPostFromArray($data);
+
+            $picturesUpdated = false;
+
+            $queryFields = "";
+
+            $this->db->query('SELECT * FROM post where id = :postId');
+            $this->db->bind(":postId", $this->id);
+
+            $row = $this->db->single();
+
+            $this->setPostFromRow($row);
+
+            if (array_key_exists('pictures', $data)) {
+                if (!is_null($this->pictures)) {
+                    // if ((strcmp($data['picture'], $this->picture)) != 0) {
+                        // if ((strcmp($data['picture']['name'], $this->picture['name'])) != 0) {
+                        $picturesUpdated = true;
+                        $this->setPictures($data['pictures']);
+                        $this->uploadPictures();
+                        $queryFields .= "pictures = :pictures, ";
+                    // }
+                }
+                // else {
+                    $picturesUpdated = true;
+                    $this->setPictures($data['pictures']);
+                    $queryFields .= "pictures = :pictures, ";
+                // }
+            }
+
+            $queryFields = rtrim($queryFields, ", ");
+
+            // if (!$bookNameUpdated && !$authorUpdated && !$descriptionUpdated && !$boughtDateUpdated && !$priceUpdated && !$postTypeUpdated && !$postRatingUpdated) {
+                if (!$picturesUpdated) {
+                $response = new Response();
+                $response->setHttpStatusCode(400);
+                $response->setSuccess(false);
+                $response->addMessage("No new picture to update");
+                $response->send();
+                exit;
+            }
+
+            $this->db->query("UPDATE post SET " . $queryFields . " WHERE id = :postId");
+            $this->db->bind(':postId', $this->id);
+
+
+            if ($picturesUpdated)
+                $this->db->bind(":pictures", $this->getPicturesInString($this->pictures));
+
+
+            $this->db->execute();
+
+            if ($this->db->rowCount() > 0) {
+
+                $row = $this->getPost($this->id);
+
+                $this->setPostFromRow($row);
+
+                $postArray = array();
+                $postArray[] = $this->returnPostAsArray();
+
+                $returnData = array();
+
+                $returnData["rows_returned"] = $this->db->rowCount();
+                $returnData["posts"] = $postArray;
+
+                $response = new Response();
+                $response->setHttpStatusCode(200);
+                $response->setSuccess(true);
+                $response->addMessage("Pictures Updated successfully");
+                $response->setData($returnData);
+                return $response;
+                // $response->send();
+                // exit;
+            } else {
+
+                $response = new Response();
+                $response->setHttpStatusCode(500);
+                $response->setSuccess(false);
+                $response->addMessage("Something went wrong, please try again");
+                $response->send();
+                exit;
+            }
+        } catch (PostException $ex) {
+            $response = new Response();
+            $response->setHttpStatusCode(400);
+            $response->setSuccess(false);
+            $response->addMessage($ex->getMessage());
+            $response->send();
+            exit;
+        } catch (PDOException $ex) {
+            error_log("Fun updatePostImages: " . $ex, 0);
+            $response = new Response();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage("Database Error");
+            $response->send();
+            exit;
+        }
+    }
 
 
     public function updatePost($id, $data)
@@ -656,7 +925,7 @@ class Post
             $this->setUserId($data['userId']);
             $this->setId($id);
 
-            $this->setPostFromArray($data);
+            // $this->setPostFromArray($data);
 
             if (!$this->postExists($this->userId, $this->id)) {
                 $response = new Response();
@@ -666,6 +935,8 @@ class Post
                 $response->send();
                 exit;
             }
+
+            $this->setPostFromArray($data);
 
             $bookNameUpdated = false;
             $authorUpdated = false;

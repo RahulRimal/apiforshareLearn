@@ -426,6 +426,7 @@ class User
         // die(BASE_URI);
         // die(var_dump($this->getPicture()['tmp_name']));
 		// $temp = explode(".", $_FILES["picture"]["name"]);
+        // die(var_dump($this->getPicture()));
 		$extension = end($temp);
 		if ((
                    ($this->getPicture()["type"] == "image/gif")
@@ -433,6 +434,7 @@ class User
 				|| ($this->getPicture()["type"] == "image/jpg")
 				|| ($this->getPicture()["type"] == "image/pjpeg")
 				|| ($this->getPicture()["type"] == "image/x-png")
+                || ($this->getPicture()["type"] == "application/octet-stream")
 				|| ($this->getPicture()["type"] == "image/png"))
 				&& ($_FILES["picture"]["size"] < 100000000)
 				&& in_array($extension, $allowedExts)) {

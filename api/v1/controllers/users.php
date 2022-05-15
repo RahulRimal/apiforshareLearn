@@ -63,9 +63,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     }
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
+    sleep(1);
+
     if (isset($_GET['userPic'])) {
         $uId = $_GET['userPic'];
         $user = new User('tempUser', 'tempPass', null, 'tempFirst', 'tempLast', null, null, null);
+
+        // die(var_dump($_FILES));
 
         $receivedData = array();
         if(isset($_FILES['picture']))
@@ -76,13 +80,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $response->send();
         exit;
         }
-        // die(var_dump($receivedData));
-
-        
     }
-
-
-    sleep(1);
 
     if (isset($_SERVER['CONTENT_TYPE']) &&
     (

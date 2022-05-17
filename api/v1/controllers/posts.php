@@ -48,6 +48,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $postId = $_GET['post'];
 
         $post = new Post();
+        // $post->createPostFolder($postId);
         $response = $post->getPostById($postId);
         $response->send();
         exit;

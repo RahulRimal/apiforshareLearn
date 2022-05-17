@@ -140,7 +140,6 @@ class Post
         else
             $this->userId = $userId;
     }
-
     public function setBookName($bookName)
     {
         if (is_null($bookName))
@@ -225,24 +224,6 @@ class Post
             $this->bookCount = $bookCount;
     }
 
-    public function setPictures($pictures)
-    {
-        if (is_null($pictures))
-            $this->pictures = null;
-        if (empty($pictures))
-            // throw new PostException('Pictures can\'t be empty');
-            $this->pictures = null;
-        
-        if(!is_array($pictures))
-        {
-            $pictureArray = explode(',', $pictures);
-            $this->pictures = $pictureArray;
-        }
-
-        else
-            $this->pictures = $pictures;
-    }
-
 
     public function setBookWishlist($wishlisted)
     {
@@ -255,6 +236,24 @@ class Post
             throw new PostException('Book wishlist must be numeric value');
         else
             $this->wishlisted = $wishlisted;
+    }
+
+    public function setPictures($pictures)
+    {
+        if (is_null($pictures))
+            $this->pictures = null;
+        else if (empty($pictures))
+            // throw new PostException('Pictures can\'t be empty');
+            $this->pictures = null;
+        
+        else if(!is_array($pictures))
+        {
+            $pictureArray = explode(',', $pictures);
+            $this->pictures = $pictureArray;
+        }
+
+        else
+            $this->pictures = $pictures;
     }
 
 
@@ -426,6 +425,18 @@ class Post
     }
 
 
+    public function createPostFolder($id)
+    {
+        // $path = BASE_FOLDER . 'images/posts/' . $this->id;
+
+        // if (!is_dir($path)) {
+            if (!is_dir("../../../images/posts/" . $this->getId())) {
+            // mkdir($path, 0777, true);
+            mkdir("../../../images/posts/" . $this->getId(), 0777, true);
+        }
+
+    }
+
 
     public function uploadPictures(){
 		$allowedExts = array("gif", "jpeg", "jpg", "png");
@@ -437,10 +448,6 @@ class Post
         {
             $temp = explode(".", $picture["name"]);
             $extension = end($temp);
-
-            // die(var_dump($extension));
-
-            // die(var_dump($picture["type"]));
 
             if ((($picture["type"] == "image/gif")
                     || ($picture["type"] == "image/jpeg")
@@ -460,9 +467,13 @@ class Post
                     $response->send();
                     exit;
                 } else {
-                    
-                    if (file_exists(BASE_URI ."images/posts/" . $this->getId(). "/". $picture["name"])) {
-                        // redirect('register.php', 'File already exists', 'error');
+
+                    if(!is_dir("../../../images/posts/" . $this->getId()))
+                    {
+                        mkdir("../../../images/posts/" . $this->getId(), 0777, true);
+                    }
+
+                        if (file_exists("../../../images/posts/" . $this->getId(). "/". $picture["name"])) {
                         $response = new Response();
                     $response->setHttpStatusCode(500);
                     $response->setSuccess(false);
@@ -473,6 +484,8 @@ class Post
                         move_uploaded_file($picture["tmp_name"], ('../../../images/posts/'. $this->getId(). "/". $picture["name"]));
                         // return true;
                     }
+
+                    clearstatcache();
                 }
             }
             else {
@@ -842,6 +855,7 @@ class Post
                 // else {
                     $picturesUpdated = true;
                     $this->setPictures($data['pictures']);
+                    $this->uploadPictures();
                     $queryFields .= "pictures = :pictures, ";
                 // }
             }

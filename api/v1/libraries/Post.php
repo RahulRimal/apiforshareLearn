@@ -501,13 +501,45 @@ class Post
             $picCount++;
 	}
 
-    // $response = new Response();
-    //                 $response->setHttpStatusCode(200);
-    //                 $response->setSuccess(false);
-    //                 $response->addMessage("Pictures updated successfully");
-    //                 $response->send();
-    //                 exit;
+        // $response = new Response();
+        //                 $response->setHttpStatusCode(200);
+        //                 $response->setSuccess(false);
+        //                 $response->addMessage("Pictures updated successfully");
+        //                 $response->send();
+        //                 exit;
 
+    }
+
+        public function getPicturesArrayInString($pictures)
+    {
+
+        $picturesInString = "";
+
+        foreach($pictures as $picture) {
+            $picturesInString .= $picture . ',';
+        } 
+        $picturesInString = chop($picturesInString, ',');
+
+        return $picturesInString;
+    }
+
+        public function deletePictures($pictures)
+    {
+        foreach ($pictures as $picture) {
+
+        if (file_exists("../../../images/posts/" . $this->getId(). "/". $picture)) {
+            unlink("../../../images/posts/" . $this->getId(). "/". $picture);
+
+        } else {
+            $response = new Response();
+        $response->setHttpStatusCode(500);
+        $response->setSuccess(false);
+        $response->addMessage("Picture not found on path");
+        $response->send();
+        exit();
+        }
+
+        }
     }
 
 
@@ -922,6 +954,163 @@ class Post
             exit;
         } catch (PDOException $ex) {
             error_log("Fun updatePostImages: " . $ex, 0);
+            $response = new Response();
+            $response->setHttpStatusCode(500);
+            $response->setSuccess(false);
+            $response->addMessage("Database Error");
+            $response->send();
+            exit;
+        }
+    }
+
+        public function deletePostImages($id, $data)
+    {
+
+        $picsToDelete = array();
+
+        try {
+            $this->setId($id);
+
+                if (!$this->checkPostExistsById($this->id)) {
+                $response = new Response();
+                $response->setHttpStatusCode(404);
+                $response->setSuccess(false);
+                $response->addMessage("Couldn't find the post to delete the pictures");
+                $response->send();
+                exit;
+            }
+
+            $this->setPostFromArray($data);
+
+            $picturesUpdated = false;
+
+            $queryFields = "";
+
+            $this->db->query('SELECT * FROM post where id = :postId');
+            $this->db->bind(":postId", $this->id);
+
+            $row = $this->db->single();
+
+            $this->setPostFromRow($row);
+
+            if (array_key_exists('pictures', $data)) {
+                if (!is_null($this->pictures)) {
+                    // if ((strcmp($data['picture'], $this->picture)) != 0) {
+                        // if ((strcmp($data['picture']['name'], $this->picture['name'])) != 0) {
+
+                            // foreach ($this->pictures as $picc) {
+                            //     echo ($picc);
+                            // }
+
+                            // echo('\n');
+
+                            // foreach ($data['pictures'] as $pi) {
+                            //     echo($pi['name']);
+                            // }
+
+                            $receivedPics = array();
+
+                            foreach ($data['pictures'] as $pi) {
+                                $receivedPics[] = $pi['name'];
+                            }
+
+                            // $common = array_intersect($this->pictures, $data['pictures']);
+                            $common = array_intersect($this->pictures, $receivedPics);
+
+                            foreach ($common as $c) {
+                                $picsToDelete[] = $c;
+                            }
+
+                            $picsToKeep = array_diff($this->pictures, $receivedPics);
+
+                        $picturesUpdated = true;
+                        // $this->setPictures($data['pictures']);
+
+                        $this->setPictures($picsToKeep);
+
+                        $this->deletePictures($picsToDelete);
+                        // $this->uploadPictures();
+                        $queryFields .= "pictures = :pictures, ";
+
+
+                    
+                }
+
+                else{
+                    $response = new Response();
+                    $response->setHttpStatusCode(400);
+                    $response->setSuccess(false);
+                    $response->addMessage("Couldn't get pictures to delete");
+                    $response->send();
+                    exit;
+                }
+
+
+            }
+
+            $queryFields = rtrim($queryFields, ", ");
+
+            // if (!$bookNameUpdated && !$authorUpdated && !$descriptionUpdated && !$boughtDateUpdated && !$priceUpdated && !$postTypeUpdated && !$postRatingUpdated) {
+                if (!$picturesUpdated) {
+                $response = new Response();
+                $response->setHttpStatusCode(400);
+                $response->setSuccess(false);
+                $response->addMessage("No pictures provided to delete");
+                $response->send();
+                exit;
+            }
+
+            $this->db->query("UPDATE post SET " . $queryFields . " WHERE id = :postId");
+            $this->db->bind(':postId', $this->id);
+
+
+            if ($picturesUpdated)
+                // $this->db->bind(":pictures", $this->getPicturesInString($this->pictures));
+                $this->db->bind(":pictures", $this->getPicturesArrayInString($this->pictures));
+
+
+            $this->db->execute();
+
+            if ($this->db->rowCount() > 0) {
+
+                $row = $this->getPost($this->id);
+
+                $this->setPostFromRow($row);
+
+                $postArray = array();
+                $postArray[] = $this->returnPostAsArray();
+
+                $returnData = array();
+
+                $returnData["rows_returned"] = $this->db->rowCount();
+                $returnData["posts"] = $postArray;
+
+                $response = new Response();
+                $response->setHttpStatusCode(200);
+                $response->setSuccess(true);
+                $response->addMessage("Pictures deleted successfully");
+                $response->setData($returnData);
+                return $response;
+                // $response->send();
+                // exit;
+            } else {
+
+                $response = new Response();
+                $response->setHttpStatusCode(500);
+                $response->setSuccess(false);
+                $response->addMessage("Something went wrong, please try again");
+                $response->send();
+                exit;
+            }
+        } catch (PostException $ex) {
+            $response = new Response();
+            $response->setHttpStatusCode(400);
+            $response->setSuccess(false);
+            $response->addMessage($ex->getMessage());
+            $response->send();
+            exit;
+        } catch (PDOException $ex) {
+            error_log("Fun deletePostImages: " . $ex, 0);
             $response = new Response();
             $response->setHttpStatusCode(500);
             $response->setSuccess(false);

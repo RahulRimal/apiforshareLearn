@@ -17,6 +17,8 @@ RewriteRule ^posts$ api/v1/controllers/posts.php [L]
 RewriteRule ^posts/u/([0-9]+)$ api/v1/controllers/posts.php?user=$1 [L]
 RewriteRule ^posts/p/([0-9]+)$ api/v1/controllers/posts.php?post=$1 [L]
 RewriteRule ^posts/postPics/([0-9]+)$ api/v1/controllers/posts.php?postPictures=$1 [L]
+RewriteRule ^posts/delPics/([0-9]+)$ api/v1/controllers/posts.php?deletePostPictures=$1 [L]
+
 
 RewriteRule ^carts$ api/v1/controllers/carts.php [L]
 RewriteRule ^carts/([0-9]+)$ api/v1/controllers/carts.php?cart=$1 [L]

@@ -112,6 +112,47 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         
     }
 
+    if (isset($_GET['deletePostPictures'])) {
+
+        $pId = $_GET['deletePostPictures'];
+        
+        $post = new Post();
+
+        $picCount = 1;
+
+        $receivedData = array();
+
+        foreach ($_FILES as $file) {
+
+            $receivedData['pic'. strval($picCount)] = $file;
+            $picCount++;
+        }
+
+        $pictureArray = array();
+
+        $pictureArray['pictures'] = $receivedData;
+
+
+        if(isset($_FILES))
+        {
+            $response = $post->deletePostImages($pId, $pictureArray);
+            $response->send();
+            exit;
+        }
+        
+
+        // if(isset($_FILES['picture']))
+        // {
+        //     $receivedData['picture'] = $_FILES['picture'];
+
+        //     $response = $user->updateInfo($uId, $receivedData);
+        // $response->send();
+        // exit;
+        // }
+
+        
+    }
+
 
 
     if (isset($_SERVER['CONTENT_TYPE']) &&

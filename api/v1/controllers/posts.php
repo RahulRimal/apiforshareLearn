@@ -41,9 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $response = $post->getUserPost($uId);
         $response->send();
         exit;
-    }
-
-    elseif (isset($_GET['post'])) {
+    } elseif (isset($_GET['post'])) {
 
         $postId = $_GET['post'];
 
@@ -61,20 +59,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
     //     $response->send();
     //     exit;
     // }
-        else
-        {
-            $post = new Post();
-            $response = $post->getAnnonimusPost();
-            $response->send();
-            exit;
-        }
-
+    else {
+        $post = new Post();
+        $response = $post->getAnnonimusPost();
+        $response->send();
+        exit;
+    }
 } elseif ($_SERVER['REQUEST_METHOD'] == 'POST') {
     sleep(1);
 
     if (isset($_GET['postPictures'])) {
         $pId = $_GET['postPictures'];
-        
+
         $post = new Post();
 
         $picCount = 1;
@@ -83,7 +79,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
         foreach ($_FILES as $file) {
 
-            $receivedData['pic'. strval($picCount)] = $file;
+            $receivedData['pic' . strval($picCount)] = $file;
             $picCount++;
         }
 
@@ -92,13 +88,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         $pictureArray['pictures'] = $receivedData;
 
 
-        if(isset($_FILES))
-        {
+        if (isset($_FILES)) {
             $response = $post->updatePostImages($pId, $pictureArray);
             $response->send();
             exit;
         }
-        
+
 
         // if(isset($_FILES['picture']))
         // {
@@ -109,37 +104,37 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         // exit;
         // }
 
-        
+
     }
 
     if (isset($_GET['deletePostPictures'])) {
 
         $pId = $_GET['deletePostPictures'];
-        
+
         $post = new Post();
 
-        $picCount = 1;
+        $rawData = file_get_contents('php://input');
 
-        $receivedData = array();
-
-        foreach ($_FILES as $file) {
-
-            $receivedData['pic'. strval($picCount)] = $file;
-            $picCount++;
-        }
-
-        $pictureArray = array();
-
-        $pictureArray['pictures'] = $receivedData;
-
-
-        if(isset($_FILES))
-        {
-            $response = $post->deletePostImages($pId, $pictureArray);
+        if (!$jsonData = json_decode($rawData)) {
+            $response = new Response();
+            $response->setHttpStatusCode(400);
+            $response->setSuccess(false);
+            $response->addMessage("Invalid JSON body");
             $response->send();
             exit;
         }
-        
+
+        $response = $post->deletePostImages($pId, $jsonData->pics);
+        $response->send();
+        exit;
+
+        // if(isset($_FILES))
+        // {
+        //     $response = $post->deletePostImages($pId, $jsonData->pics);
+        //     $response->send();
+        //     exit;
+        // }
+
 
         // if(isset($_FILES['picture']))
         // {
@@ -150,19 +145,21 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
         // exit;
         // }
 
-        
+
     }
 
 
 
-    if (isset($_SERVER['CONTENT_TYPE']) &&
-    (
-        ($_SERVER['CONTENT_TYPE'] != 'application/json')
-    &&
-    ($_SERVER['CONTENT_TYPE'] != 'application/json; charset=utf-8')
-    // ||
-    // ($_SERVER['CONTENT_TYPE'] != 'application/json; charset=utf-8')
-    )) {
+    if (
+        isset($_SERVER['CONTENT_TYPE']) &&
+        (
+            ($_SERVER['CONTENT_TYPE'] != 'application/json')
+            &&
+            ($_SERVER['CONTENT_TYPE'] != 'application/json; charset=utf-8')
+            // ||
+            // ($_SERVER['CONTENT_TYPE'] != 'application/json; charset=utf-8')
+        )
+    ) {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
@@ -216,7 +213,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 
     if (isset($jsonData->boughtDate))
         $data['boughtDate'] = $jsonData->boughtDate;
-    
+
     if (isset($jsonData->bookCount))
         $data['bookCount'] = $jsonData->bookCount;
 
@@ -242,14 +239,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'GET') {
 } elseif ($_SERVER['REQUEST_METHOD'] == 'PATCH') {
     sleep(1);
 
-    if (isset($_SERVER['CONTENT_TYPE']) &&
-    (
-        ($_SERVER['CONTENT_TYPE'] != 'application/json')
-    &&
-    ($_SERVER['CONTENT_TYPE'] != 'application/json; charset=utf-8')
-    // ||
-    // ($_SERVER['CONTENT_TYPE'] != 'application/json; charset=utf-8')
-    )) {
+    if (
+        isset($_SERVER['CONTENT_TYPE']) &&
+        (
+            ($_SERVER['CONTENT_TYPE'] != 'application/json')
+            &&
+            ($_SERVER['CONTENT_TYPE'] != 'application/json; charset=utf-8')
+            // ||
+            // ($_SERVER['CONTENT_TYPE'] != 'application/json; charset=utf-8')
+        )
+    ) {
         $response = new Response();
         $response->setHttpStatusCode(400);
         $response->setSuccess(false);
